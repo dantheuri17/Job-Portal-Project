@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .form-control-file {
+            overflow: hidden;
+        }
+
+        #imagePreview {
+            max-width: 200px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <a href="/student/profile">Student Profile</a>
+        <a href="/student/settings">Settings</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="content">
+        <h2>Student Settings</h2>
+        <form action="/student/settings" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="studentFirstName">First Name:</label>
+                <input type="text" class="form-control" id="studentFirstName" name="studentFirstName"
+                    placeholder="Enter your first name">
+            </div>
+
+            <div class="form-group">
+                <label for="studentLastName">Last Name:</label>
+                <input type="text" class="form-control" id="studentLastName" name="studentLastName"
+                    placeholder="Enter your last name">
+            </div>
+
+            <div class="form-group">
+                <label for="studentMajor">Student Major:</label>
+                <select class="form-control" id="studentMajor" name="studentMajor">
+                    <option value="" disabled selected>Select a major</option>
+                    <option value="Applied Computer Technology">Applied Computer Technology</option>
+                    <option value="Psychology">Psychology</option>
+                    <option value="International Relations">International Relations</option>
+                    <option value="Data Science">Data Science</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="studentEmail">Email Address:</label>
+                <input type="email" class="form-control" id="studentEmail" name="studentEmail"
+                    placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="studentLocation">Location:</label>
+                <input type="text" class="form-control" id="studentLocation" name="studentLocation"
+                    placeholder="Enter your location">
+            </div>
+
+            <div class="form-group">
+                <label for="profilePicture">Profile Picture:</label>
+                <input type="file" class="form-control-file" id="profilePicture" name="profilePicture">
+            </div>
+
+            <div class="form-group">
+                <label for="resume">Resume:</label>
+                <input type="file" class="form-control-file" id="resume" name="resume">
+            </div>
+
+            <div class="form-group">
+                <label>Preview:</label>
+                <img id="imagePreview" src="#" alt="Profile Picture Preview">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <script>
+        var profilePictureInput = document.getElementById("profilePicture");
+        var resumeInput = document.getElementById("resume");
+        var imagePreview = document.getElementById("imagePreview");
+
+        profilePictureInput.addEventListener("change", function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle resume input change
+        resumeInput.addEventListener("change", function (event) {
+            var file = event.target.files[0];
+            // Handle the resume file as needed
+            // ...
+        });
+    </script>
+</body>
+
+</html>

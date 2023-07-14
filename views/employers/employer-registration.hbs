@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mb-4">Employer Registration</h1>
+        <form action="/register/employer" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="companyName" class="form-label">Company Name:</label>
+                <input type="text" id="companyName" name="companyName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="employerIndustry" class="form-label">Industry:</label>
+                <input type="text" id="industry" name="industry" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="noOfEmployees" class="form-label">Number of Employees:</label>
+                <select name="noOfEmployees" id="noOfEmployees" class="form-select">
+                    <option value="0 - 50">0 - 50</option>
+                    <option value="51 - 100">51 - 100</option>
+                    <option value="101 - 200">101 - 200</option>
+                    <option value="201 - 300">201 - 300</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="employerLocation" class="form-label">Location:</label>
+                <select id="employerLocation" name="employerLocation" class="form-select">
+                    <option value="Nairobi">Nairobi</option>
+                    <option value="Mombasa">Mombasa</option>
+                    <option value="Nakuru">Nakuru</option>
+                    <option value="Kisumu">Kisumu</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="logoImage">Logo Image:</label>
+                <input type="file" class="form-control-file" id="logoImage" name="logoImage">
+            </div>
+
+
+            <div class="mb-3">
+                <label>Preview:</label>
+                <img id="imagePreview">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+
+    <script>
+        var profilePictureInput = document.getElementById("profilePicture");
+        var imagePreview = document.getElementById("imagePreview");
+
+        profilePictureInput.addEventListener("change", function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+
+</html>
