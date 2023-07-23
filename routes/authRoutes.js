@@ -4,7 +4,7 @@ const passport = require("passport");
 const authUtils = require("../utils/authUtils");
 const multer = require('multer')
 
-// Multer storage configuration for profile picture upload
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -23,16 +23,16 @@ router.post("/register", async (req, res) => {
 
 	try {
 		if (type === "student") {
-			// Render student registration page
+			
 			await students.insertOne(newUser);
 			console.log("Student registered successfully");
 			res.render("login", { username });
 		} else if (type === "employer") {
-			// Render employer registration page
+			
 			req.session.registrationData = newUser;
 			res.render("./employers/employer-registration", { username });
 		} else {
-			// Invalid account type
+			
 			res.redirect("/register");
 		}
 	} catch (error) {
@@ -43,22 +43,26 @@ router.post("/register", async (req, res) => {
 
 
 router.post("/register/employer", upload.single("logoImage"), async (req, res) => {
-	// Retrieve the registration information from the request body
-	const { companyName, industry, noOfEmployees, employerLocation } = req.body;
+	
+	const { firstName, lastName, companyName, industry, noOfEmployees, employerLocation } = req.body;
 	const registrationData = req.session.registrationData;
-	// Perform the necessary actions to register the employer in the database
+	
 	const employers = req.app.locals.employers;
 	try {
-		// Create a new employer object with the registration information
+		
 		const newEmployer = {
 			username: registrationData.username,
 			password: registrationData.password,
+			firstName: firstName,
+			lastName: lastName,
 			accountType: registrationData.accountType,
 			companyName: companyName,
 			industry: industry,
 			noOfEmployees: noOfEmployees,
 			location: employerLocation,
 		};
+
+		console.log(newEmployer)
 
 		if(req.file) {
 			const logoBuffer = req.file.buffer; 
@@ -107,13 +111,9 @@ router.post("/login", (req, res, next) => {
 	})(req, res, next);
 });
 
-router.get("/student/dashboard", authUtils.isAuthenticated, (req, res) => {
-	res.render('./students/student-dashboard')
-})
 
-router.get("/employer/dashboard", authUtils.isAuthenticated, (req, res) => {
-	res.render("./employers/employer-dashboard");
-});
+
+
 
 // Logout
 

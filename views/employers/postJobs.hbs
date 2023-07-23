@@ -5,10 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/froala-editor@3.2.2/css/froala_editor.pkgd.min.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         /* Custom styles */
-
         body {
             padding: 20px;
         }
@@ -54,7 +53,7 @@
 
 <body>
     <h2>Post A Job</h2>
-    <form action="/employer/postJob" method="POST" enctype="multipart/form-data">
+    <form action="/employer/postJob" method="POST">
         <div class="form-group">
             <label for="jobTitle">Job Title</label>
             <input type="text" id="jobTitle" name="jobTitle" class="form-control">
@@ -70,39 +69,109 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="fileInput">File Upload</label>
-            <input type="file" id="fileInput" name="fileInput">
+            <label for="jobLevel">Job Level</label>
+            <select class="form-select" id="jobLevel" name="jobLevel">
+                <option value="" disabled selected></option>
+                <option value="Entry Level">Entry Level</option>
+                <option value="Mid Level">Mid Level</option>
+                <option value="Senior Level">Senior Level</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="closingDate">Application Closing Date</label>
+            <input type="date" id="closingDate" name="closingDate" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="pdfInput">Upload PDF</label>
+            <input type="file" id="pdfInput" name="pdfInput">
+            <button type="button" id="uploadButton" class="btn btn-primary" disabled>Upload</button>
         </div>
         <div class="form-group">
             <label for="jobDescription">Job Description</label>
-            <textarea id="jobDescription" name="jobDescription"></textarea>
+            <div id="jobDescription"></div>
+            <input type="hidden" id="jobDescriptionInput" name="jobDescription">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/froala-editor@3.2.2/js/froala_editor.pkgd.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const fileInput = document.getElementById("fileInput");
-            const editor = new FroalaEditor('#jobDescription', {
-                height: 300
+            const jobDescriptionInput = document.getElementById("jobDescriptionInput");
+            const pdfInput = document.getElementById("pdfInput");
+            const uploadButton = document.getElementById("uploadButton");
+
+            const quill = new Quill("#jobDescription", {
+                theme: "snow",
             });
 
-            fileInput.addEventListener("change", function (event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const fileContent = e.target.result;
-                        const fileExtension = file.name.split('.').pop().toLowerCase();
+            quill.on("text-change", function () {
+                const jobDescription = quill.root.innerHTML;
+                jobDescriptionInput.value = jobDescription;
+            });
 
-                        if (fileExtension === "pdf" || fileExtension === "doc" || fileExtension === "docx") {
-                            // Embed the file into the editor
-                            const embedHTML = `<embed src="${fileContent}" type="application/pdf" width="100%" height="500px" />`;
-                            editor.html.insert(embedHTML);
+            pdfInput.addEventListener("change", function (event) {
+                const file = event.target.files[0];
+                if (file && file.type === "application/pdf") {
+                    uploadButton.disabled = false;
+                } else {
+                    uploadButton.disabled = true;
+                }
+            });
+
+            uploadButton.addEventListener("click", function () {
+                const file = pdfInput.files[0];
+                if (file && file.type === "application/pdf") {
+                    const reader = new FileReader();
+                    reader.onload = async function (e) {
+                        const pdfData = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                        const numPages = pdf.numPages;
+                        let textContent = "";
+
+                        for (let i = 1; i <= numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const pageTextContent = await page.getTextContent();
+                            const pageItems = pageTextContent.items;
+
+                            let bulletListStarted = false;
+
+                            for (let j = 0; j < pageItems.length; j++) {
+                                const item = pageItems[j];
+                                const itemText = item.str;
+
+                                if (itemText.startsWith("•")) {
+                                    if (!bulletListStarted) {
+                                        // Start a bullet list
+                                        textContent += "<ul>";
+                                        bulletListStarted = true;
+                                    }
+
+                                    // Convert bullet point to a list item
+                                    textContent += `<li>${itemText.substring(1)}</li>`;
+                                } else {
+                                    if (bulletListStarted) {
+                                        // End the bullet list
+                                        textContent += "</ul>";
+                                        bulletListStarted = false;
+                                    }
+
+                                    // Treat other text as paragraphs
+                                    textContent += `<p>${itemText}</p>`;
+                                }
+                            }
+
+                            if (bulletListStarted) {
+                                // End the bullet list if it's still open
+                                textContent += "</ul>";
+                            }
                         }
+
+                        // Set the HTML content of the Quill Editor
+                        quill.clipboard.dangerouslyPasteHTML(textContent);
                     };
-                    reader.readAsDataURL(file);
+                    reader.readAsArrayBuffer(file);
                 }
             });
         });

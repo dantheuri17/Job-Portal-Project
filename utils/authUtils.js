@@ -7,13 +7,14 @@ const hashPassword = (plainText) => {
 		.digest("hex");
 };
 
-// Authentication middleware
+
+
+
 const isAuthenticated = (req, res, next) => {
 	if (req.isAuthenticated()) {
-		// If the user is authenticated, proceed to the next middleware
+		
 		return next();
 	}
-	// If the user is not authenticated, redirect to the login page
 	res.redirect("/login");
 };
 

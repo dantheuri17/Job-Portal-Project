@@ -27,6 +27,28 @@
             margin-left: 250px;
             padding: 20px;
         }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-field {
+            margin-right: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
     <title>Student Dashboard</title>
 </head>
@@ -40,7 +62,30 @@
 
     <div class="content">
         <h1>Student Dashboard</h1>
+
         <!-- Add your dashboard content here -->
+        <div class="job-listings">
+            <h2>Job Listings</h2>
+
+            <div class="search-container">
+                <form action="/student/search" method="post">
+                    <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title">
+                    <input type="text" class="search-field" name="location" placeholder="Search by location">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
+
+            <ul id="jobListings">
+                {{#each industryJobs}}
+                <li>
+                    <h3>{{this.jobTitle}}</h3>
+                    <p><strong>Company:</strong> {{this.company}}</p>
+                    <p><strong>Location:</strong> {{this.employerLocation}}</p>
+                    <p><strong>Job Type:</strong> {{this.jobType}}</p>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
     </div>
 </body>
 

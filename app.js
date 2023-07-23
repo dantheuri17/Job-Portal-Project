@@ -5,7 +5,7 @@ const { MongoClient } = require("mongodb");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
-
+const hbs = require('hbs')
 const authRouter = require('./routes/authRoutes');
 const authUtils = require('./utils/authUtils');
 const indexRouter = require('./routes/index');
@@ -16,9 +16,14 @@ const app = express();
 const port = 3000;
 
 app.set("views", "views");
+hbs.registerHelper("stripTags", function (value) {
+	const regex = /(<([^>]+)>)/gi;
+	return value.replace(regex, "");
+});
 app.set("view engine", "hbs");
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
 
 app.use(
 	session({
@@ -31,10 +36,15 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get('/', (req, res) => {
+	res.render('home')
+})
+
 const uri = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(uri);
 let studentsCollection;
 let employersCollection;
+let jobPostingsCollection; 
 
 
 client
@@ -43,10 +53,12 @@ client
 		const loginDb = client.db("loginDb");
 		studentsCollection = loginDb.collection("students");
 		employersCollection = loginDb.collection("employers");
+		jobPostingsCollection = loginDb.collection("jobPostings");
 		
 		console.log("Connected to MongoDB");
 		app.locals.students = studentsCollection;
 		app.locals.employers = employersCollection;
+		app.locals.jobPostings = jobPostingsCollection;
 	})
 	.catch((error) => {
 		console.error("Error connecting to MongoDB: ", error);
@@ -56,11 +68,11 @@ passport.use(
 	new LocalStrategy(async (username, password, done) => {
 		try {
 			let user = await studentsCollection.findOne({ username });
-			let userType = "student"; // Set default userType to "student"
+			let userType = "student"; 
 
 			if (!user) {
 				user = await employersCollection.findOne({ username });
-				userType = "employer"; // Set userType to "employer"
+				userType = "employer"; 
 			}
 
 			if (!user) {
@@ -78,7 +90,7 @@ passport.use(
 				return done(null, false, { message: "Incorrect password" });
 			}
 
-			user.userType = userType; // Add userType property to the user object
+			user.userType = userType; 
 			console.log("User authenticated");
 			return done(null, user);
 		} catch (error) {
@@ -101,7 +113,7 @@ app.use('/', indexRouter);
 app.use('/student', studentRoutes)
 app.use('/employer', employerRoutes)
 
-// Start the server
+
 app.listen(port, () => {
 	console.log(`Server started on port ${port}`);
 });

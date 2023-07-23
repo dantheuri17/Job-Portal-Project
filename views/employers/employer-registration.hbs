@@ -57,16 +57,42 @@
 <body>
     <div class="container">
         <h1 class="mb-4">Employer Registration</h1>
-        <form action="/register/employer" method="POST" enctype="multipart/form-data">
+        <form action="/register/employer" method="POST">
             <div class="mb-3">
                 <label for="companyName" class="form-label">Company Name:</label>
                 <input type="text" id="companyName" name="companyName" class="form-control" required>
             </div>
 
             <div class="mb-3">
-                <label for="employerIndustry" class="form-label">Industry:</label>
-                <input type="text" id="industry" name="industry" class="form-control" required>
+                <label for="firstName" class="form-label">First Name:</label>
+                <input type="text" id="firstName" name="firstName" class="form-control" required>
             </div>
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name:</label>
+                <input type="text" id="name" name="lastName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="industry" class="form-label">Industry:</label>
+                <select id="industry" name="industry" class="form-select" required>
+                    <option value="" disabled selected>Select Industry</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Transportation">Transportation</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+
 
             <div class="mb-3">
                 <label for="noOfEmployees" class="form-label">Number of Employees:</label>
@@ -87,7 +113,7 @@
                     <option value="Kisumu">Kisumu</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="logoImage">Logo Image:</label>
                 <input type="file" class="form-control-file" id="logoImage" name="logoImage">
