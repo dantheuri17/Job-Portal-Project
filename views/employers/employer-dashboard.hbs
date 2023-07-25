@@ -14,12 +14,7 @@
 
         .sidebar {
             width: 200px;
-            background-color: #f1f1f1;
-            padding: 20px;
-        }
-
-        .content {
-            flex: 1;
+            background-color: #f8f9fa;
             padding: 20px;
         }
 
@@ -38,14 +33,22 @@
 
         .sidebar a {
             text-decoration: none;
+            color: #007bff;
+            display: block;
         }
 
         .sidebar a:hover {
             font-weight: bold;
+            color: #0056b3;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
         }
 
         .job-card {
-            background-color: #f9f9f9;
+            background-color: #f8f9fa;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 5px;
@@ -55,17 +58,7 @@
         .job-card h3 {
             margin: 0;
             font-size: 20px;
-        }
-
-        .job-card p {
-            margin: 10px 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            word-wrap: break-word;
-            /* Added for proper word wrapping */
+            color: #007bff;
         }
     </style>
 </head>
@@ -77,29 +70,28 @@
             <li><a href="/employer/profile">Profile</a></li>
             <li><a href="/employer/postJob">Post Job</a></li>
             <li><a href="/employer/settings">Settings</a></li>
-            
             <li><a href="/logout">Logout</a></li>
         </ul>
     </div>
 
     <div class="content">
         <!-- Inside dashboard.hbs -->
-<h1>Welcome, {{employer.firstName}}!</h1>
-<h2>Job Listings:</h2>
-{{#if jobListings.length}}
-<ul>
-    {{#each jobListings}}
-    <li>
-        <h3>{{jobTitle}}</h3>
-        <p class="description">{{jobType}}</p>
-        <p class="description">{{{stripHtmlTags jobDescription}}}</p> <!-- Use triple mustache to render unescaped HTML -->
-    </li>
-    {{/each}}
-</ul>
-{{else}}
-<p>No job postings found.</p>
-{{/if}}
-
+        <h1>Welcome, {{employer.firstName}}!</h1>
+        <h2>Job Listings:</h2>
+        {{#if jobListings.length}}
+        <div id="job-cards">
+            {{#each jobListings}}
+            <a href="/job-post?id={{this._id}}" class="job-card-link">
+                <div class="job-card">
+                    <h3>{{jobTitle}}</h3>
+                    <p class="description">{{jobType}}</p>
+                </div>
+            </a>
+            {{/each}}
+        </div>
+        {{else}}
+        <p>No job postings found.</p>
+        {{/if}}
     </div>
 
 </body>

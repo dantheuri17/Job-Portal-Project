@@ -8,7 +8,7 @@ const {
 	comparePasswords,
 } = require("../utils/authUtils");
 
-// const {getJobsFromDatabase} = require("../utils/jobUtils"); 
+// const {getJobsFromDatabase} = require("../utils/jobUtils");
 
 // Multer storage configuration for profile picture upload
 const storage = multer.memoryStorage();
@@ -64,13 +64,10 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 	}
 });
 
-
-
 router.get("/profile", isAuthenticated, async (req, res) => {
 	const students = req.app.locals.students;
 
 	try {
-		
 		const user = req.user;
 		if (user && user.userType === "student") {
 			// Find the student document by ID in the database
@@ -105,10 +102,8 @@ router.get("/resume", isAuthenticated, async (req, res) => {
 	const students = req.app.locals.students;
 
 	try {
-		
 		const user = req.user;
 		if (user && user.userType === "student") {
-			
 			const student = await students.findOne({ _id: new ObjectId(user._id) });
 
 			if (student && student.resume && student.resume.binaryResumeData) {
@@ -205,7 +200,6 @@ router.post(
 					};
 				}
 
-				
 				await students.updateOne({ _id: new ObjectId(user._id) }, updateObject);
 
 				// Change password if old password, new password, and confirm password are provided
@@ -232,10 +226,8 @@ router.post(
 						return res.redirect("/student/settings");
 					}
 
-					
 					const hashedPassword = hashPassword(newPassword);
 
-					
 					await students.updateOne(
 						{ _id: new ObjectId(user._id) },
 						{ $set: { password: hashedPassword } }
@@ -256,50 +248,123 @@ router.post(
 	}
 );
 
-// Route to handle the job search
 router.post("/search", isAuthenticated, async (req, res) => {
-    const studentsCollection = req.app.locals.students;
-    const jobPostingsCollection = req.app.locals.jobPostings;
-    const user = req.user;
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const user = req.user;
 
-    try {
-        if (user && user.userType === "student") {
-            const student = await studentsCollection.findOne({
-                _id: new ObjectId(user._id),
-            });
+	try {
+		if (user && user.userType === "student") {
+			const { jobTitle, location } = req.body;
 
-            if (student) {
-                const { jobTitle, location } = req.body;
-                const industryJobs = await getJobsFromStudentIndustry(
-                    jobPostingsCollection,
-                    student.industry
-                );
+			// Fetch all jobs from the database
+			const allJobs = await jobPostingsCollection.find().toArray();
 
-				console.log(industryJobs)
+			const filteredJobs = allJobs.filter((job) => {
+				let titleMatch = false;
+				let locationMatch = false;
 
-                // Filter the jobs based on the search criteria (jobTitle and location)
-                const filteredJobs = industryJobs.filter((job) => {
-                    const titleMatch = job.jobTitle.toLowerCase().includes(jobTitle.toLowerCase());
-                    const locationMatch = job.employerLocation.toLowerCase().includes(location.toLowerCase());
-                    return titleMatch && locationMatch;
-                });
+				if (jobTitle) {
+					titleMatch = job.jobTitle
+						.toLowerCase()
+						.includes(jobTitle.toLowerCase());
+				}
 
-                res.render("./students/student-dashboard", {
-                    student,
-                    industryJobs: filteredJobs,
-                });
-            } else {
-                console.log("Student not found");
-                res.redirect("/login");
-            }
-        } else {
-            console.log("Invalid user or user type");
-            res.redirect("/login");
-        }
-    } catch (error) {
-        console.error("Error retrieving student dashboard:", error);
-        res.redirect("/login");
-    }
+				if (location && job.employerLocation) {
+					locationMatch = job.employerLocation
+						.toLowerCase()
+						.includes(location.toLowerCase());
+				}
+				return titleMatch || locationMatch;
+			});
+
+			res.render("./students/student-dashboard", {
+				student: user,
+				jobListings: filteredJobs,
+			});
+		} else {
+			console.log("Invalid user or user type");
+			res.redirect("/login");
+		}
+	} catch (error) {
+		console.error("Error retrieving student dashboard:", error);
+		res.redirect("/login");
+	}
+});
+
+
+router.get("/job-post", async (req, res) => {
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const jobId = req.query.id; 
+	try {
+
+		const jobPost = await jobPostingsCollection.findOne({
+			_id: new ObjectId(jobId),
+		});
+
+		if (jobPost) {
+			
+			res.render("./jobs/job-post", { jobPost });
+		} else {
+			
+			res.status(404).send("Job not found");
+		}
+	} catch (error) {
+		
+		console.error("Error retrieving job details:", error);
+		res.status(500).send("An error occurred while fetching job details");
+	}
+});
+
+router.get("/saved-posts", isAuthenticated, async (req, res) => {
+	const user = req.user;
+	const studentsCollection = req.app.locals.students;
+	const jobsCollection = req.app.locals.jobPostings;
+	let allSavedPosts = []; // Change from const to let
+
+
+	try {
+		const student = await studentsCollection.findOne({
+			_id: new ObjectId(user._id), // Use ObjectId to convert the user ID to ObjectId
+		});
+
+		if (student) {
+			const savedPostsId = student.savedPosts;
+			
+			allSavedPosts = await jobsCollection
+				.find({
+					_id: { $in: savedPostsId.map((id) => new ObjectId(id)) }, // Convert the saved post IDs to ObjectId
+				})
+				.toArray();
+		}
+		res.render("./students/saved-posts", { allSavedPosts });
+	} catch (error) {
+		console.log("error retrieving saved post:", error);
+		res
+			.status(500)
+			.json({ error: "An error occurred while retrieving saved Job Posts" });
+	}
+});
+
+router.post("/save-post", isAuthenticated, async (req, res) => {
+	const studentsCollection = req.app.locals.students;
+	const user = req.user;
+
+	try {
+		const postId = req.body.postId; // Assuming the post ID is sent in the request body
+		const studentId = user._id;
+
+		// Update the student document and add the post ID to the savedPosts array if it's not already saved
+		    await studentsCollection.updateOne(
+					{ _id: new ObjectId(studentId) },
+					{ $addToSet: { savedPosts: postId } }
+				);
+				
+		console.log("Post saved successfully"); 
+		res.sendStatus(200); // Send a response status 200 (OK) indicating the post was saved successfully
+	} catch (error) {
+		console.error("Error saving post:", error);
+		res.sendStatus(500); // Send a response status 500 (Internal Server Error) if there was an error
+	}
 });
 
 

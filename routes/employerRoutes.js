@@ -111,10 +111,12 @@ router.post("/postJob", isAuthenticated, async (req, res) => {
 	const { jobTitle, jobType, jobDescription, jobLevel, closingDate } = req.body;
 	const employerId = req.user._id;
 	const employerIndustry = req.user.industry; 
-	const employerLocation = req.user.employerLocation; 
+	const employerLocation = req.user.employerLocation;
+	const employerCompanyName = req.user.companyName;  
 
 	try {
 		const newJob = {
+			company: employerCompanyName,
 			jobTitle: jobTitle,
 			jobType: jobType,
 			jobDescription: jobDescription,

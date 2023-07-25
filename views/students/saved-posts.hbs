@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Add necessary meta tags and styles -->
+    <title>Saved Job Posts</title>
+</head>
+
+<body>
+    <h1>Saved Job Posts</h1>
+
+    <div id="saved-job-cards">
+        {{#each allSavedPosts}}
+        <div class="saved-job-card">
+            <h3>{{this.jobTitle}}</h3>
+            <p><strong>Company:</strong> {{this.company}}</p>
+            <p><strong>Location:</strong> {{this.employerLocation}}</p>
+            <p><strong>Job Type:</strong> {{this.jobType}}</p>
+        </div>
+        {{/each}}
+    </div>
+
+    <!-- Add any additional content or scripts as needed -->
+</body>
+
+</html>
