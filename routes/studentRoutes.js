@@ -270,6 +270,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
 			res.render("./students/student-dashboard", {
 				student: user,
 				jobListings: filteredJobs,
+				query: { jobTitle, location }, 
 			});
 		} else {
 			console.log("Invalid user or user type");
@@ -280,6 +281,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
 		res.redirect("/login");
 	}
 });
+
 
 
 router.get("/job-post", async (req, res) => {

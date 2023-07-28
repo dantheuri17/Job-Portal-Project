@@ -137,8 +137,8 @@
 
             <div class="search-container">
                 <form action="/student/search" method="post">
-                    <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title">
-                    <input type="text" class="search-field" name="location" placeholder="Search by location">
+                    <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title" value="{{query.jobTitle}}">
+                    <input type="text" class="search-field" name="location" placeholder="Search by location" value="{{query.location}}"> 
             
                     <!-- Industry Filter -->
                     <select name="industry">
