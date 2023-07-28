@@ -139,6 +139,34 @@
                 <form action="/student/search" method="post">
                     <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title">
                     <input type="text" class="search-field" name="location" placeholder="Search by location">
+            
+                    <!-- Industry Filter -->
+                    <select name="industry">
+                        <option value="">Select Industry</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Finance">Finance</option>
+                        <!-- Add more industry options as needed -->
+                    </select>
+            
+                    <!-- Job Type Filter -->
+                    <select name="jobType">
+                        <option value="">Select Job Type</option>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Internship">Internship</option>
+                        <!-- Add more job type options as needed -->
+                    </select>
+            
+                    <!-- Job Level Filter -->
+                    <select name="jobLevel">
+                        <option value="">Select Job Level</option>
+                        <option value="Entry-level">Entry-level</option>
+                        <option value="Mid-level">Mid-level</option>
+                        <option value="Senior">Senior</option>
+                        <!-- Add more job level options as needed -->
+                    </select>
+            
                     <button type="submit" class="search-button">Search</button>
                 </form>
             </div>

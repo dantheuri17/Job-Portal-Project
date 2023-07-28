@@ -254,28 +254,18 @@ router.post("/search", isAuthenticated, async (req, res) => {
 
 	try {
 		if (user && user.userType === "student") {
-			const { jobTitle, location } = req.body;
+			const { jobTitle, location, industry, jobType, jobLevel } = req.body;
 
-			// Fetch all jobs from the database
-			const allJobs = await jobPostingsCollection.find().toArray();
+			// Prepare filter options
+			const filters = {};
+			if (jobTitle) filters.jobTitle = new RegExp(jobTitle, "i");
+			if (location) filters.employerLocation = new RegExp(location, "i");
+			if (industry) filters.industry = industry;
+			if (jobType) filters.jobType = jobType;
+			if (jobLevel) filters.jobLevel = jobLevel;
 
-			const filteredJobs = allJobs.filter((job) => {
-				let titleMatch = false;
-				let locationMatch = false;
-
-				if (jobTitle) {
-					titleMatch = job.jobTitle
-						.toLowerCase()
-						.includes(jobTitle.toLowerCase());
-				}
-
-				if (location && job.employerLocation) {
-					locationMatch = job.employerLocation
-						.toLowerCase()
-						.includes(location.toLowerCase());
-				}
-				return titleMatch || locationMatch;
-			});
+			// Fetch and filter job listings from the database
+			const filteredJobs = await jobPostingsCollection.find(filters).toArray();
 
 			res.render("./students/student-dashboard", {
 				student: user,
