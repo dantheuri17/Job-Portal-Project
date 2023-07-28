@@ -350,22 +350,31 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 	const user = req.user;
 
 	try {
-		const postId = req.body.postId; // Assuming the post ID is sent in the request body
+		const postId = req.body.postId; 
 		const studentId = user._id;
 
-		// Update the student document and add the post ID to the savedPosts array if it's not already saved
-		    await studentsCollection.updateOne(
-					{ _id: new ObjectId(studentId) },
-					{ $addToSet: { savedPosts: postId } }
-				);
-				
-		console.log("Post saved successfully"); 
-		res.sendStatus(200); // Send a response status 200 (OK) indicating the post was saved successfully
+		if (!postId) {
+			return res.sendStatus(400); 
+		}
+
+		const result = await studentsCollection.updateOne(
+			{ _id: new ObjectId(studentId) },
+			{ $addToSet: { savedPosts: postId } }
+		);
+
+		if (result.modifiedCount === 1) {
+			console.log("Post saved successfully");
+			res.sendStatus(204); 
+		} else {
+			console.log("Post already saved"); 
+			res.sendStatuas(204)
+		}
 	} catch (error) {
 		console.error("Error saving post:", error);
-		res.sendStatus(500); // Send a response status 500 (Internal Server Error) if there was an error
+		res.sendStatus(500); 
 	}
 });
+
 
 
 module.exports = router;

@@ -112,6 +112,10 @@
         .save-button:hover {
             background-color: #0056b3;
         }
+         .save-button.filled {
+            background-color: #f0ad4e;
+            color: #fff;
+        }
     </style>
     <title>Student Dashboard</title>
 </head>
@@ -147,7 +151,7 @@
                         <p><strong>Company:</strong> {{this.company}}</p>
                         <p><strong>Location:</strong> {{this.employerLocation}}</p>
                         <p><strong>Job Type:</strong> {{this.jobType}}</p>
-                        <form id="saveForm" action="/student/save-post" method="post">
+                        <form class="saveForm" action="/student/save-post" method="post">
                             <input type="hidden" name="postId" value="{{this._id}}">
                             <button type="submit" class="save-button">
                                 <i class="far fa-star"></i> Save
@@ -160,35 +164,23 @@
         </div>
     </div>
 
-<script>
-    // Add event listener to the form
-    const saveForm = document.getElementById('saveForm');
-    saveForm.addEventListener('submit', async function (event) {
-        event.preventDefault(); // Prevent the default form submission behavior
+    <script>
+        
+        const saveButtons = document.querySelectorAll('.save-button');
 
-        const formData = new FormData(saveForm);
-        const postId = formData.get('postId');
-
-        try {
-            const response = await fetch(saveForm.action, {
-                method: 'POST',
-                body: formData,
+        saveButtons.forEach(button => {
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                const form = event.target.closest('.saveForm');
+                const isFilled = button.classList.toggle('filled');
+                if (isFilled) {
+                    form.submit();
+                } else {
+                    // You can perform any other actions here if needed
+                }
             });
-
-            if (response.ok) {
-                // Success: The post was saved
-                console.log('Post saved successfully');
-                // You can update the button text or any other UI change here if needed
-            } else {
-                // There was an error saving the post
-                console.error('Error saving post:', response.statusText);
-            }
-        } catch (error) {
-            // There was a network or other error
-            console.error('Error saving post:', error.message);
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 
