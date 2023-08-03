@@ -31,7 +31,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 });
 
 router.get("/postJob", isAuthenticated, (req, res) => {
-	console.log(req.user)
+	console.log(req.user);
 	res.render("./employers/postJobs");
 });
 
@@ -110,9 +110,9 @@ router.post("/postJob", isAuthenticated, async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;
 	const { jobTitle, jobType, jobDescription, jobLevel, closingDate } = req.body;
 	const employerId = req.user._id;
-	const employerIndustry = req.user.industry; 
+	const employerIndustry = req.user.industry;
 	const employerLocation = req.user.employerLocation;
-	const employerCompanyName = req.user.companyName;  
+	const employerCompanyName = req.user.companyName;
 
 	try {
 		const newJob = {
@@ -121,17 +121,17 @@ router.post("/postJob", isAuthenticated, async (req, res) => {
 			jobType: jobType,
 			jobDescription: jobDescription,
 			jobLevel: jobLevel,
-			industry: employerIndustry, 
+			industry: employerIndustry,
 			closingDate: closingDate,
 			employerId: employerId,
-			employerLocation: employerLocation
+			employerLocation: employerLocation,
 		};
 
 		const result = await jobPostingsCollection.insertOne(newJob);
 
 		console.log("Job posted successfully");
-		console.log(req.user.employerLocation); 
-		console.log(newJob)
+		console.log(req.user.employerLocation);
+		console.log(newJob);
 		res.redirect("/employer/dashboard");
 	} catch (error) {
 		console.error("Error posting job:", error);
@@ -178,5 +178,57 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 		res.redirect("/login");
 	}
 });
+
+router.get("/job-post", async (req, res) => {
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const jobId = req.query.id;
+	try {
+		const jobPost = await jobPostingsCollection.findOne({
+			_id: new ObjectId(jobId),
+		});
+
+		if (jobPost) {
+			res.render("./jobs/employer-job-post", { jobPost });
+		} else {
+			res.status(404).send("Job not found");
+		}
+	} catch (error) {
+		console.error("Error retrieving job details:", error);
+		res.status(500).send("An error occurred while fetching job details");
+	}
+});
+
+router.get("/job-applications", isAuthenticated, async (req, res) => {
+	const employersCollection = req.app.locals.employers;
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const studentsCollection = req.app.locals.students;
+
+	const user = req.user;
+
+	try {
+		const employer = await employersCollection.findOne({
+			_id: new ObjectId(user._id),
+		});
+
+		if (employer) {
+			const jobPostings = await jobPostingsCollection.find({employerId: employer._id.toString(),}).toArray();
+			const students = await studentsCollection.find().toArray();
+
+			const data = {
+				students: students,
+				jobPostings: jobPostings,
+			};
+
+			res.render("./employers/employer-application-dashboard", data);
+		} else { 
+			console.log("Employer not found"); 
+			res.redirect('/login');
+		}
+	} catch (error) {
+		console.error("error retrieving employer job applications", error); 
+		res.redirect('/login');
+	}
+});
+
 
 module.exports = router;

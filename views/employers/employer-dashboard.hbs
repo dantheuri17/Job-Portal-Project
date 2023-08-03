@@ -70,6 +70,7 @@
             <li><a href="/employer/profile">Profile</a></li>
             <li><a href="/employer/postJob">Post Job</a></li>
             <li><a href="/employer/settings">Settings</a></li>
+            <li><a href="/employer/job-applications">Application Dashboard</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </div>
@@ -81,7 +82,7 @@
         {{#if jobListings.length}}
         <div id="job-cards">
             {{#each jobListings}}
-            <a href="/job-post?id={{this._id}}" class="job-card-link">
+            <a href="/employer/job-post?id={{this._id}}" class="job-card-link">
                 <div class="job-card">
                     <h3>{{jobTitle}}</h3>
                     <p class="description">{{jobType}}</p>

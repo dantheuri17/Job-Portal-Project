@@ -19,7 +19,11 @@
                 <p class="card-text"><strong>Company:</strong> {{jobPost.company}}</p>
                 <p class="card-text"><strong>Location:</strong> {{jobPost.employerLocation}}</p>
                 <p class="card-text"><strong>Job Type:</strong> {{jobPost.jobType}}</p>
-                
+                <!-- Add "Apply Now" button or link -->
+                <form action="/student/apply-job" method="post">
+                    <input type="hidden" name="jobId" value="{{jobPost._id}}">
+                    <button type="submit" class="btn btn-primary">Apply Now</button>
+                </form>
             </div>
         </div>
         {{else}}

@@ -270,7 +270,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
 			res.render("./students/student-dashboard", {
 				student: user,
 				jobListings: filteredJobs,
-				query: { jobTitle, location }, 
+				query: { jobTitle, location },
 			});
 		} else {
 			console.log("Invalid user or user type");
@@ -282,28 +282,87 @@ router.post("/search", isAuthenticated, async (req, res) => {
 	}
 });
 
-
-
 router.get("/job-post", async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;
-	const jobId = req.query.id; 
+	const jobId = req.query.id;
 	try {
-
 		const jobPost = await jobPostingsCollection.findOne({
 			_id: new ObjectId(jobId),
 		});
 
 		if (jobPost) {
-			
-			res.render("./jobs/job-post", { jobPost });
+			res.render("./jobs/student-job-post", { jobPost });
 		} else {
-			
 			res.status(404).send("Job not found");
 		}
 	} catch (error) {
-		
 		console.error("Error retrieving job details:", error);
 		res.status(500).send("An error occurred while fetching job details");
+	}
+});
+
+router.get("/applied-jobs", isAuthenticated, async (req, res) => {
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const studentsCollection = req.app.locals.students;
+	const user = req.user;
+	let allAppliedJobs = [];
+
+	try {
+		const student = await studentsCollection.findOne({
+			_id: new ObjectId(user._id),
+		});
+
+		if (student) {
+			const appliedJobsId = student.appliedJobs;
+			
+
+			allAppliedJobs = await jobPostingsCollection
+				.find({
+					_id: { $in: appliedJobsId.map((id) => new ObjectId(id)) }, // Convert the saved post IDs to ObjectId
+				})
+				.toArray();
+		}
+		console.log('applied jobs', allAppliedJobs)
+		res.render("./students/student-applied-jobs", { allAppliedJobs });
+	} catch (error) {
+		console.error("Error retrieving applied job details", error);
+		res.status(500).send("Error occured while fetching applied job details");
+	}
+});
+
+router.post("/apply-job", isAuthenticated, async (req, res) => {
+	const jobPostingsCollection = req.app.locals.jobPostings;
+	const studentsCollection = req.app.locals.students;
+	const user = req.user;
+	const jobId = req.body.jobId; // Assuming the jobId is sent in the request body
+
+	try {
+		// Check if the student is logged in and is of the type "student"
+		if (user && user.userType === "student") {
+			// Retrieve the student ID
+			const studentId = user._id;
+
+			// Add the student ID to the job post's applicants array
+			await jobPostingsCollection.updateOne(
+				{ _id: new ObjectId(jobId) },
+				{ $addToSet: { applicants: studentId } }
+			);
+
+			// Add the job ID to the student's appliedJobs array
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId) },
+				{ $addToSet: { appliedJobs: jobId } }
+			);
+
+			console.log("Job application submitted successfully");
+			res.sendStatus(204);
+		} else {
+			console.log("Invalid user or user type");
+			res.sendStatus(401); // Unauthorized status code
+		}
+	} catch (error) {
+		console.error("Error submitting job application:", error);
+		res.sendStatus(500);
 	}
 });
 
@@ -313,7 +372,6 @@ router.get("/saved-posts", isAuthenticated, async (req, res) => {
 	const jobsCollection = req.app.locals.jobPostings;
 	let allSavedPosts = []; // Change from const to let
 
-
 	try {
 		const student = await studentsCollection.findOne({
 			_id: new ObjectId(user._id), // Use ObjectId to convert the user ID to ObjectId
@@ -321,7 +379,7 @@ router.get("/saved-posts", isAuthenticated, async (req, res) => {
 
 		if (student) {
 			const savedPostsId = student.savedPosts;
-			
+
 			allSavedPosts = await jobsCollection
 				.find({
 					_id: { $in: savedPostsId.map((id) => new ObjectId(id)) }, // Convert the saved post IDs to ObjectId
@@ -342,11 +400,11 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 	const user = req.user;
 
 	try {
-		const postId = req.body.postId; 
+		const postId = req.body.postId;
 		const studentId = user._id;
 
 		if (!postId) {
-			return res.sendStatus(400); 
+			return res.sendStatus(400);
 		}
 
 		const result = await studentsCollection.updateOne(
@@ -356,17 +414,15 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 
 		if (result.modifiedCount === 1) {
 			console.log("Post saved successfully");
-			res.sendStatus(204); 
+			res.sendStatus(204);
 		} else {
-			console.log("Post already saved"); 
-			res.sendStatuas(204)
+			console.log("Post already saved");
+			res.sendStatus(204);
 		}
 	} catch (error) {
 		console.error("Error saving post:", error);
-		res.sendStatus(500); 
+		res.sendStatus(500);
 	}
 });
-
-
 
 module.exports = router;
