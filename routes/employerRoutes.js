@@ -212,23 +212,25 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 
 		if (employer) {
 			const jobPostings = await jobPostingsCollection.find({employerId: employer._id.toString(),}).toArray();
-			const students = await studentsCollection.find().toArray();
 
-			const data = {
-				students: students,
-				jobPostings: jobPostings,
-			};
+			const jobIds = jobPostings.map((job) => job._id.toString());
 
-			res.render("./employers/employer-application-dashboard", data);
+			const students = await studentsCollection.find({
+				appliedJobs: {$in: jobIds},
+			}).toArray()
+
+			
+
+			res.render("./employers/employer-application-dashboard", {students, jobPostings})
+
 		} else { 
 			console.log("Employer not found"); 
-			res.redirect('/login');
+			res.redirect('/login')
 		}
-	} catch (error) {
+	} catch {
 		console.error("error retrieving employer job applications", error); 
-		res.redirect('/login');
+		res.redirect('/login')
 	}
 });
-
 
 module.exports = router;
