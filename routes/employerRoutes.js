@@ -211,26 +211,108 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 		});
 
 		if (employer) {
-			const jobPostings = await jobPostingsCollection.find({employerId: employer._id.toString(),}).toArray();
-
-			const jobIds = jobPostings.map((job) => job._id.toString());
-
-			const students = await studentsCollection.find({
-				appliedJobs: {$in: jobIds},
-			}).toArray()
+			const jobPostings = await jobPostingsCollection
+				.find({ employerId: employer._id.toString() })
+				.toArray();
 
 			
+			const jobIds = jobPostings.map((job) => job._id.toString());
 
-			res.render("./employers/employer-application-dashboard", {students, jobPostings})
+			console.log("Job Ids", jobIds)
 
-		} else { 
-			console.log("Employer not found"); 
-			res.redirect('/login')
+			const students = await studentsCollection
+				.aggregate([
+					{
+						$match: {
+							"appliedJobs.jobId": { $in: jobIds.map((id) => id.toString()) },
+						},
+					},
+					{ $project: { firstName: 1, lastName: 1, email: 1, appliedJobs: 1 } },
+				])
+				.toArray();
+
+
+				console.log("students", students)
+
+			students.forEach((student) => {
+				console.log(`Student ${student._id}:`);
+				student.appliedJobs.forEach((appliedJob) => {
+					console.log("  Job ID:", appliedJob.jobId);
+					console.log("  Status:", appliedJob.status);
+				});
+			});
+
+			// Create an object to store job postings and their applicants
+			const jobApplications = jobPostings.map((job) => ({
+				jobPost: job,
+				students: students.filter((student) =>
+					student.appliedJobs.some(
+						(appliedJob) => appliedJob.jobId === job._id.toString()
+					)
+				),
+			}));
+
+			res.render("./employers/employer-application-dashboard", {
+				jobApplications,
+			});
+		} else {
+			console.log("Employer not found");
+			res.redirect("/login");
 		}
-	} catch {
-		console.error("error retrieving employer job applications", error); 
-		res.redirect('/login')
+	} catch (error) {
+		console.error("error retrieving employer job applications", error);
+		res.redirect("/login");
 	}
 });
+
+// Add a POST route to accept a student application
+router.post(
+	"/accept-student/:studentId/:jobId",
+	isAuthenticated,
+	async (req, res) => {
+		const studentsCollection = req.app.locals.students;
+		const studentId = req.params.studentId;
+		const jobId = req.params.jobId;
+
+		try {
+			// Update the student's application status to "Accepted"
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId), appliedJobs: jobId },
+				{ $set: { "appliedJobs.$.status": "Accepted" } }
+			);
+
+			console.log("Student application accepted");
+			res.sendStatus(200);
+		} catch (error) {
+			console.error("Error accepting student application:", error);
+			res.sendStatus(500);
+		}
+	}
+);
+
+// Add a POST route to reject a student application
+router.post(
+	"/reject-student/:studentId/:jobId",
+	isAuthenticated,
+	async (req, res) => {
+		const studentsCollection = req.app.locals.students;
+		const studentId = req.params.studentId;
+		const jobId = req.params.jobId;
+
+		try {
+			// Update the student's application status to "Rejected"
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId), appliedJobs: jobId },
+				{ $set: { "appliedJobs.$.status": "Rejected" } }
+			);
+
+			console.log("Student application rejected");
+			res.sendStatus(200);
+		} catch (error) {
+			console.error("Error rejecting student application:", error);
+			res.sendStatus(500);
+		}
+	}
+);
 
 module.exports = router;

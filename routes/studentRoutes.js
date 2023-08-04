@@ -347,11 +347,12 @@ router.post("/apply-job", isAuthenticated, async (req, res) => {
 				{ _id: new ObjectId(jobId) },
 				{ $addToSet: { applicants: studentId } }
 			);
-
+			
+			const status = "Pending"
 			// Add the job ID to the student's appliedJobs array
 			await studentsCollection.updateOne(
 				{ _id: new ObjectId(studentId) },
-				{ $addToSet: { appliedJobs: jobId } }
+				{ $push: { appliedJobs: { jobId: jobId, status: status } } }
 			);
 
 			console.log("Job application submitted successfully");

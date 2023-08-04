@@ -20,6 +20,11 @@ hbs.registerHelper("stripTags", function (value) {
 	const regex = /(<([^>]+)>)/gi;
 	return value.replace(regex, "");
 });
+
+hbs.registerHelper("eq", function (a, b) {
+	return a === b;
+});
+
 app.set("view engine", "hbs");
 
 app.use(express.urlencoded({ extended: true }));

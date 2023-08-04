@@ -1,5 +1,3 @@
-<!-- employer-job-applications.hbs -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,26 +12,41 @@
 <body>
     <div class="container mt-4">
         <h1>Job Applications</h1>
-        <table class="table table-bordered table-hover mt-3">
-            <thead>
-                <tr>
-                    <th scope="col">Job Title</th>
-                    <th scope="col">Student Name</th>
-                    <th scope="col">Email</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each students}}
-                {{#each this.jobPostings}}
-                <tr>
-                    <td>{{ this.jobTitle }}</td>
-                    <td>{{ ../firstName }} {{ ../lastName }}</td>
-                    <td>{{ ../email }}</td>
-                </tr>
-                {{/each}}
-                {{/each}}
-            </tbody>
-        </table>
+        {{#each jobApplications}}
+        <div class="card mt-4">
+            <div class="card-header">
+                Job: {{this.jobPost.jobTitle}}
+            </div>
+            <div class="card-body">
+                <!-- ... (previous code) ... -->
+                {{#if this.students.length}}
+                <h5 class="card-title">Applicants:</h5>
+                <ul class="list-group">
+                    {{#each this.students}}
+                    <li class="list-group-item">
+                        <b>Name:</b> {{this.firstName}} {{this.lastName}}<br>
+                        <b>Email:</b> {{this.email}}<br>
+                        <b>Resume:</b> <a href="{{this.resumeLink}}">View Resume</a><br>
+
+                        <!-- Add forms for accept/reject buttons -->
+                        <form class="d-inline" method="POST"
+                            action="/employer/accept-student/{{this._id}}/{{this.jobPost._id}}">
+                            <button class="btn btn-success" type="submit">Accept</button>
+                        </form>
+
+                        <form class="d-inline" method="POST"
+                            action="/employer/reject-student/{{this._id}}/{{this.jobPost._id}}">
+                            <button class="btn btn-danger" type="submit">Reject</button>
+                        </form>
+                    </li>
+                    {{/each}}
+                </ul>
+                {{else}}
+                <p>No applicants for this job.</p>
+                {{/if}}
+            </div>
+        </div>
+        {{/each}}
     </div>
 
     <!-- Bootstrap JS (Place at the end of the body for faster loading) -->
