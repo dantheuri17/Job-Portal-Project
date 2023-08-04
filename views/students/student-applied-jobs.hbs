@@ -1,5 +1,3 @@
-<!-- student-applied-jobs.hbs -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,25 +5,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applied Jobs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background-color: #343a40;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .job {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .job-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .job-info {
+            color: #777777;
+            margin-top: 0.5rem;
+        }
+
+        .no-jobs {
+            text-align: center;
+            color: #777777;
+            margin-top: 2rem;
+        }
+
+        .job-status {
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .status-Accepted {
+            color: #28a745;
+            background-color: #d4edda;
+        }
+
+        .status-Rejected {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .status-Pending {
+            color: #ffc107;
+            background-color: #fff3cd;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Jobs Applied by {{ student.name }}</h1>
-    {{#if allAppliedJobs.length}}
-    <ul>
-        {{#each allAppliedJobs}}
-        <li>
-            Job Title: {{ jobTitle }}<br>
-            Company: {{ company }}<br>
-            Location: {{ employerLocation }}<br>
-            Description: {{ jobDescription }}<br>
-            <!-- Add other job details as needed -->
-        </li>
-        {{/each}}
-    </ul>
-    {{else}}
-    <p>No jobs applied yet.</p>
-    {{/if}}
+    <div class="header">
+        <h1>Jobs Applied by {{ student.name }}</h1>
+    </div>
+    <div class="container">
+        {{#if allAppliedJobs.length}}
+        <ul>
+            {{#each allAppliedJobs}}
+            <li class="job">
+                <div class="job-title">{{ jobTitle }}</div>
+                <div class="job-info">Company: {{ company }}</div>
+                <div class="job-info">Location: {{ employerLocation }}</div>
+                <div class="job-info">Status:
+                    <span class="job-status status-{{ status }}">{{ status }}</span>
+                </div> <!-- Add other job details as needed -->
+            </li>
+            {{/each}}
+        </ul>
+        {{else}}
+        <p class="no-jobs">No jobs applied yet.</p>
+        {{/if}}
+    </div>
 </body>
 
 </html>

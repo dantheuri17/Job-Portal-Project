@@ -26,16 +26,16 @@
                     <li class="list-group-item">
                         <b>Name:</b> {{this.firstName}} {{this.lastName}}<br>
                         <b>Email:</b> {{this.email}}<br>
-                        <b>Resume:</b> <a href="{{this.resumeLink}}">View Resume</a><br>
+                        <b>Resume:</b> <a href="/student/resume">View Resume</a><br>
 
                         <!-- Add forms for accept/reject buttons -->
                         <form class="d-inline" method="POST"
-                            action="/employer/accept-student/{{this._id}}/{{this.jobPost._id}}">
+                            action="/employer/accept-student/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-success" type="submit">Accept</button>
                         </form>
 
                         <form class="d-inline" method="POST"
-                            action="/employer/reject-student/{{this._id}}/{{this.jobPost._id}}">
+                            action="/employer/reject-student/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-danger" type="submit">Reject</button>
                         </form>
                     </li>

@@ -98,12 +98,12 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 	}
 });
 
-router.get("/resume", isAuthenticated, async (req, res) => {
+router.get("/resume", async (req, res) => {
 	const students = req.app.locals.students;
 
 	try {
 		const user = req.user;
-		if (user && user.userType === "student") {
+		if (user ) {
 			const student = await students.findOne({ _id: new ObjectId(user._id) });
 
 			if (student && student.resume && student.resume.binaryResumeData) {
@@ -305,7 +305,6 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;
 	const studentsCollection = req.app.locals.students;
 	const user = req.user;
-	let allAppliedJobs = [];
 
 	try {
 		const student = await studentsCollection.findOne({
@@ -313,22 +312,46 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 		});
 
 		if (student) {
-			const appliedJobsId = student.appliedJobs;
-			
+			const appliedJobs = student.appliedJobs; // Array of applied jobs
+
+			const appliedJobIds = appliedJobs.map((job) => job.jobId); // Extract job IDs from objects
+
+			// Convert extracted IDs to ObjectId format
+			const appliedJobObjectIds = appliedJobIds.map((id) => new ObjectId(id));
 
 			allAppliedJobs = await jobPostingsCollection
 				.find({
-					_id: { $in: appliedJobsId.map((id) => new ObjectId(id)) }, // Convert the saved post IDs to ObjectId
+					_id: { $in: appliedJobObjectIds },
 				})
 				.toArray();
+
+			// Combine allAppliedJobs with status of applications
+			const allAppliedJobsWithStatus = allAppliedJobs.map((job) => {
+				const appliedJob = appliedJobs.find(
+					(appliedJob) => appliedJob.jobId === job._id.toString()
+				);
+				if (appliedJob) {
+					return { ...job, status: appliedJob.status };
+				} else {
+					return job;
+				}
+			});
+
+			res.render("./students/student-applied-jobs", {
+				allAppliedJobs: allAppliedJobsWithStatus,
+			});
+
+		} else {
+			res.render("./students/student-applied-jobs", { allAppliedJobs: [] });
 		}
-		console.log('applied jobs', allAppliedJobs)
-		res.render("./students/student-applied-jobs", { allAppliedJobs });
 	} catch (error) {
 		console.error("Error retrieving applied job details", error);
-		res.status(500).send("Error occured while fetching applied job details");
+		res.status(500).send("Error occurred while fetching applied job details");
 	}
 });
+
+
+
 
 router.post("/apply-job", isAuthenticated, async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;

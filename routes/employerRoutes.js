@@ -215,10 +215,9 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 				.find({ employerId: employer._id.toString() })
 				.toArray();
 
-			
 			const jobIds = jobPostings.map((job) => job._id.toString());
 
-			console.log("Job Ids", jobIds)
+			console.log("Job Ids", jobIds);
 
 			const students = await studentsCollection
 				.aggregate([
@@ -231,8 +230,7 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 				])
 				.toArray();
 
-
-				console.log("students", students)
+			console.log("students", students);
 
 			students.forEach((student) => {
 				console.log(`Student ${student._id}:`);
@@ -243,14 +241,22 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 			});
 
 			// Create an object to store job postings and their applicants
-			const jobApplications = jobPostings.map((job) => ({
-				jobPost: job,
-				students: students.filter((student) =>
+			const jobApplications = jobPostings.map((job) => {
+				// Filter students who applied for this job
+				const applicants = students.filter((student) =>
 					student.appliedJobs.some(
 						(appliedJob) => appliedJob.jobId === job._id.toString()
 					)
-				),
-			}));
+				);
+
+				return {
+					jobPost: {
+						jobId: job._id.toString(), // Add jobId to the jobPost object
+						jobTitle: job.jobTitle,
+					},
+					students: applicants,
+				};
+			});
 
 			res.render("./employers/employer-application-dashboard", {
 				jobApplications,
@@ -275,9 +281,9 @@ router.post(
 		const jobId = req.params.jobId;
 
 		try {
-			// Update the student's application status to "Accepted"
+			// Update the student's application status to "Accepted" for the specific job
 			await studentsCollection.updateOne(
-				{ _id: new ObjectId(studentId), appliedJobs: jobId },
+				{ _id: new ObjectId(studentId), "appliedJobs.jobId": jobId },
 				{ $set: { "appliedJobs.$.status": "Accepted" } }
 			);
 
@@ -289,6 +295,7 @@ router.post(
 		}
 	}
 );
+
 
 // Add a POST route to reject a student application
 router.post(
@@ -302,7 +309,7 @@ router.post(
 		try {
 			// Update the student's application status to "Rejected"
 			await studentsCollection.updateOne(
-				{ _id: new ObjectId(studentId), appliedJobs: jobId },
+				{ _id: new ObjectId(studentId), "appliedJobs.jobId": jobId },
 				{ $set: { "appliedJobs.$.status": "Rejected" } }
 			);
 
