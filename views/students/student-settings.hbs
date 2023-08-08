@@ -94,17 +94,6 @@
             </div>
 
             <div class="form-group">
-                <label for="studentMajor">Student Major:</label>
-                <select class="form-control" id="studentMajor" name="studentMajor">
-                    <option value="" disabled selected>Select a major</option>
-                    <option value="Applied Computer Technology">Applied Computer Technology</option>
-                    <option value="Psychology">Psychology</option>
-                    <option value="International Relations">International Relations</option>
-                    <option value="Data Science">Data Science</option>
-                </select>
-            </div>
-
-            <div class="form-group">
                 <label for="studentEmail">Email Address:</label>
                 <input type="email" class="form-control" id="studentEmail" name="studentEmail"
                     placeholder="Enter your email address">
@@ -112,21 +101,31 @@
 
             <div class="form-group">
                 <label for="studentAcademicSchool">Academic School</label>
-                <select name="studentAcademicSchool" id="studentAcademicSchool">
-                    <option value="Chandaria School of Business"></option>
-                    <option value="School of Science and Technology">Chandaria School of Science and Technology</option>
-                    <option value="School of Humanities & Social Sciences">Humanities & Social Sciences</option>
-                    <option value="School of Pharmacy & Health Sciences">Pharmacy & Health Sciences</option>
-                    <option value="Graduate Studies, Research & Extension">Graduate School, Research & Extension</option>
-                    <option value="School of Communication, Cinematic and Creative Arts">Communication, Cinematic and Creative Arts</option>
+                <select class="form-select" name="studentAcademicSchool" id="studentAcademicSchool">
+                    <option value="Chandaria School of Business">Chandaria School of Business</option>
+                    <option value="School of Science and Technology">School of Science and Technology</option>
+                    <option value="School of Humanities & Social Sciences">School of Humanities & Social Sciences
+                    </option>
+                    <option value="School of Pharmacy & Health Sciences">School of Pharmacy & Health Sciences</option>
+                    <option value="Graduate Studies, Research & Extension">Graduate School, Research & Extension
+                    </option>
+                    <option value="School of Communication, Cinematic and Creative Arts">School of Communication,
+                        Cinematic and
+                        Creative Arts</option>
                 </select>
             </div>
 
 
+            <div class="form-group">
+                <label for="studentMajor">Student Major:</label>
+                <select class="form-select" id="studentMajor" name="studentMajor">
+                    <option value="" disabled selected>Select a major</option>
+                </select>
+            </div>
 
             <div class="form-group">
                 <label for="industry" class="form-label">Industry:</label>
-                <select id="studentIndustry" name="studentIndustry" class="form-select" >
+                <select id="studentIndustry" name="studentIndustry" class="form-select">
                     <option value="" disabled selected>Select Industry</option>
                     <option value="Information Technology">Information Technology</option>
                     <option value="Finance">Finance</option>
@@ -152,6 +151,11 @@
             </div>
 
             <div class="form-group">
+                <label for="studentAddress">Address:</label>
+                <input class="form-control" type="text" name="studentAddress" id="studentAddress">
+            </div>
+
+            <div class="form-group">
                 <label for="profilePicture">Profile Picture:</label>
                 <input type="file" class="form-control-file" id="profilePicture" name="profilePicture">
             </div>
@@ -171,13 +175,13 @@
                 <input type="password" class="form-control" id="currentPassword" name="currentPassword"
                     placeholder="Enter your current password">
             </div>
-            
+
             <div class="form-group">
                 <label for="newPassword">New Password:</label>
                 <input type="password" class="form-control" id="newPassword" name="newPassword"
                     placeholder="Enter your new password">
             </div>
-            
+
             <div class="form-group">
                 <label for="confirmPassword">Confirm New Password:</label>
                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
@@ -189,6 +193,90 @@
     </div>
 
     <script>
+        var academicSchoolSelect = document.getElementById("studentAcademicSchool");
+        var majorSelect = document.getElementById("studentMajor");
+        var form = document.getElementById("studentSettingsForm");
+
+        var majorsData = {
+            "Chandaria School of Business": [
+                "Bachelor of Global Leadership and Governance",
+                "BSc in Accounting",
+                "BSc in Hotel and Restaurant Management",
+                "BSc in International Business Administration"
+            ],
+            "School of Science and Technology": [
+                "BSc in Applied Computer Technology",
+                "BSc in Information Systems & Technology",
+                "BSc in Data Science and Analytics",
+                "BSc in Software Engineering"
+            ],
+            "School of Humanities & Social Sciences": [
+                "BA in International Relations",
+                "BA in Criminal Justice Studies",
+                "BA in Psychology",
+                "BA in Sociology"
+            ],
+            "School of Pharmacy & Health Sciences": [
+                "Bachelor of Pharmacy",
+                "BSc in Applied Biochemistry",
+                "Bachelor of Technology in Analytical Chemistry",
+                "BSc in Epidemiology and Biostatistics"
+            ],
+            "Graduate Studies, Research & Extension": [
+                "Master of Business Administration (MBA)",
+                "Master of Science in Computer Science",
+                "Master of Arts in Education",
+                "Master of Public Health (MPH)",
+                "Master of Science in Global Banking and Finance",
+                "Online Master of Business Administration",
+                "Master of Business Administration",
+                "Master of Business Administration",
+                "MBA - Global Business Management",
+                "MBA - Health Leadership and Management",
+                "Master of Science in Management and Organizational Development",
+                "Master of Arts in Criminal and Transitional Justice",
+                "Master of Arts in International Relations",
+                "Master of Arts in Counselling Psychology",
+                "Master of Arts in Clinical Psychology",
+                "Master of Arts in Marriage and Family Therapy",
+                "Master of Science in Information Security",
+                "Master of Science in Information Systems and Technology",
+                "Master of Arts in Communication Studies"
+            ],
+            "School of Communication, Cinematic and Creative Arts": [
+                "BA in Animation",
+                "BA in Film Production and Directing",
+                "BA in Journalism"
+            ]
+
+        };
+
+        academicSchoolSelect.addEventListener("change", function () {
+            var selectedSchool = academicSchoolSelect.value;
+            var majors = majorsData[selectedSchool] || [];
+
+            majorSelect.innerHTML = ''; // Clear existing options
+
+            // Populate the majors dropdown with options
+            majors.forEach(function (major) {
+                var option = document.createElement("option");
+                option.value = major;
+                option.textContent = major;
+                majorSelect.appendChild(option);
+            });
+        });
+
+        form.addEventListener("submit", function (event) {
+            if (majorSelect.value === "") {
+                event.preventDefault();
+                alert("Please select a major.");
+            }
+        });
+
+
+
+
+
         var profilePictureInput = document.getElementById("profilePicture");
         var resumeInput = document.getElementById("resume");
         var imagePreview = document.getElementById("imagePreview");
@@ -213,6 +301,7 @@
             // Handle the resume file as needed
             // ...
         });
+
     </script>
 </body>
 

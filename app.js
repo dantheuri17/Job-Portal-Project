@@ -11,6 +11,8 @@ const authUtils = require('./utils/authUtils');
 const indexRouter = require('./routes/index');
 const studentRoutes = require('./routes/studentRoutes')
 const employerRoutes = require('./routes/employerRoutes')
+const flash = require('express-flash')
+const methodOverride = require('method-override')
 
 const app = express();
 const port = 3000;
@@ -29,6 +31,7 @@ app.set("view engine", "hbs");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+app.use(methodOverride("_method"));
 
 app.use(
 	session({
@@ -40,6 +43,8 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(flash())
 
 app.get('/', (req, res) => {
 	res.render('home')
@@ -72,6 +77,7 @@ client
 passport.use(
 	new LocalStrategy(async (username, password, done) => {
 		try {
+			username = username.trim(); 
 			let user = await studentsCollection.findOne({ username });
 			let userType = "student"; 
 

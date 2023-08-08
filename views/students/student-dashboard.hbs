@@ -112,9 +112,14 @@
         .save-button:hover {
             background-color: #0056b3;
         }
-         .save-button.filled {
+
+        .save-button.filled {
             background-color: #f0ad4e;
             color: #fff;
+        }
+
+        a {
+            text-decoration: none;
         }
     </style>
     <title>Student Dashboard</title>
@@ -126,7 +131,7 @@
         <a href="/student/settings">Settings</a>
         <a href="/student/saved-posts">Saved Posts</a>
         <a href="/student/applied-jobs">Applied Jobs</a>
-        
+
         <a href="/logout">Logout</a>
     </div>
 
@@ -139,9 +144,11 @@
 
             <div class="search-container">
                 <form action="/student/search" method="post">
-                    <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title" value="{{query.jobTitle}}">
-                    <input type="text" class="search-field" name="location" placeholder="Search by location" value="{{query.location}}"> 
-            
+                    <input type="text" class="search-field" name="jobTitle" placeholder="Search by job title"
+                        value="{{query.jobTitle}}">
+                    <input type="text" class="search-field" name="location" placeholder="Search by location"
+                        value="{{query.location}}">
+
                     <!-- Industry Filter -->
                     <select name="industry">
                         <option value="">Select Industry</option>
@@ -150,7 +157,7 @@
                         <option value="Finance">Finance</option>
                         <!-- Add more industry options as needed -->
                     </select>
-            
+
                     <!-- Job Type Filter -->
                     <select name="jobType">
                         <option value="">Select Job Type</option>
@@ -159,7 +166,7 @@
                         <option value="Internship">Internship</option>
                         <!-- Add more job type options as needed -->
                     </select>
-            
+
                     <!-- Job Level Filter -->
                     <select name="jobLevel">
                         <option value="">Select Job Level</option>
@@ -168,13 +175,13 @@
                         <option value="Senior">Senior</option>
                         <!-- Add more job level options as needed -->
                     </select>
-            
+
                     <button type="submit" class="search-button">Search</button>
                 </form>
             </div>
 
             <div id="job-cards">
-                {{#each jobListings}}
+                {{#each jobListings.studentIndustryJobs}}
                 <a href="/student/job-post?id={{this._id}}" class="job-card-link">
                     <div class="job-card">
                         <h3>{{this.jobTitle}}</h3>
@@ -183,7 +190,7 @@
                         <p><strong>Job Type:</strong> {{this.jobType}}</p>
                         <form class="saveForm" action="/student/save-post" method="post">
                             <input type="hidden" name="postId" value="{{this._id}}">
-                            <button type="submit" class="save-button">
+                            <button type="submit" class="save-button {{#if isSaved}}filled{{/if}}">
                                 <i class="far fa-star"></i> Save
                             </button>
                         </form>
@@ -195,19 +202,16 @@
     </div>
 
     <script>
-        
+
         const saveButtons = document.querySelectorAll('.save-button');
 
         saveButtons.forEach(button => {
             button.addEventListener('click', event => {
+                console.log('Button clicked');
                 event.preventDefault();
                 const form = event.target.closest('.saveForm');
                 const isFilled = button.classList.toggle('filled');
-                if (isFilled) {
-                    form.submit();
-                } else {
-                    // You can perform any other actions here if needed
-                }
+                form.submit()
             });
         });
     </script>

@@ -288,7 +288,7 @@ router.post(
 			);
 
 			console.log("Student application accepted");
-			res.sendStatus(200);
+			res.sendStatus(204);
 		} catch (error) {
 			console.error("Error accepting student application:", error);
 			res.sendStatus(500);
@@ -314,7 +314,7 @@ router.post(
 			);
 
 			console.log("Student application rejected");
-			res.sendStatus(200);
+			res.sendStatus(204);
 		} catch (error) {
 			console.error("Error rejecting student application:", error);
 			res.sendStatus(500);
@@ -322,4 +322,29 @@ router.post(
 	}
 );
 
+router.post(
+	"/delete-application/:studentId/:jobId",
+	isAuthenticated,
+	async (req, res) => {
+		const studentsCollection = req.app.locals.students;
+		const studentId = req.params.studentId;
+		const jobId = req.params.jobId;
+
+		try {
+			// Remove the student's application for the specific job
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId) },
+				{ $pull: { appliedJobs: { jobId: jobId } } }
+			);
+
+			console.log("Student application deleted");
+			res.sendStatus(204);
+		} catch (error) {
+			console.error("Error deleting student application:", error);
+			res.sendStatus(500);
+		}
+	}
+);
+
 module.exports = router;
+

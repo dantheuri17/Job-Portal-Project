@@ -22,6 +22,7 @@ const getJobsFromStudentIndustry = async (jobPostingsCollection, industry) => {
 			.find({ industry: industry })
 			.limit(6)
 			.toArray();
+			
 		return jobs;
 	} catch (error) {
 		console.error("Error fetching jobs from the database:", error);
@@ -42,14 +43,24 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 
 			if (student) {
 				// Fetch job listings based on the student's industry preference (6 jobs in this example)
-				const industryJobs = await getJobsFromStudentIndustry(
+				const studentIndustryJobs = await getJobsFromStudentIndustry(
 					jobPostingsCollection,
 					student.industry
 				);
-				res.render("./students/student-dashboard", {
-					student,
-					industryJobs, // Pass the industry-specific job listings to the view
-				});
+
+				const jobListingsWithSavedFlag = studentIndustryJobs.map(job => {
+					return {
+						...job,
+						isSaved: student.savedPosts.includes(job._id.toString())
+					}
+				})
+
+				const jobListings = {
+					studentIndustryJobs: jobListingsWithSavedFlag
+				}
+
+				console.log('Job Listings', jobListings)
+				res.render("./students/student-dashboard", { jobListings });
 			} else {
 				console.log("Student not found");
 				res.redirect("/login");
@@ -103,7 +114,7 @@ router.get("/resume", async (req, res) => {
 
 	try {
 		const user = req.user;
-		if (user ) {
+		if (user) {
 			const student = await students.findOne({ _id: new ObjectId(user._id) });
 
 			if (student && student.resume && student.resume.binaryResumeData) {
@@ -141,10 +152,12 @@ router.post(
 		const {
 			studentFirstName,
 			studentLastName,
-			studentMajor,
 			studentEmail,
+			studentAcademicSchool,
+			studentMajor,
 			studentIndustry,
 			studentLocation,
+			studentAddress,
 			oldPassword,
 			newPassword,
 			confirmPassword,
@@ -163,17 +176,25 @@ router.post(
 				if (studentLastName) {
 					Object.assign(updateObject.$set, { lastName: studentLastName });
 				}
-				if (studentMajor) {
-					Object.assign(updateObject.$set, { major: studentMajor });
-				}
 				if (studentEmail) {
 					Object.assign(updateObject.$set, { email: studentEmail });
+				}
+				if (studentAcademicSchool) {
+					Object.assign(updateObject.$set, {
+						studentAcademicSchool: studentAcademicSchool,
+					});
+				}
+				if (studentMajor) {
+					Object.assign(updateObject.$set, { major: studentMajor });
 				}
 				if (studentIndustry) {
 					Object.assign(updateObject.$set, { industry: studentIndustry });
 				}
 				if (studentLocation) {
 					Object.assign(updateObject.$set, { location: studentLocation });
+				}
+				if (studentAddress) {
+					Object.assign(updateObject.$set, { studentAddress, studentAddress });
 				}
 
 				// If a profile picture is uploaded, add it to the update object
@@ -249,29 +270,56 @@ router.post(
 );
 
 router.post("/search", isAuthenticated, async (req, res) => {
+	const studentsCollection = req.app.locals.students;
 	const jobPostingsCollection = req.app.locals.jobPostings;
 	const user = req.user;
 
 	try {
 		if (user && user.userType === "student") {
-			const { jobTitle, location, industry, jobType, jobLevel } = req.body;
-
-			// Prepare filter options
-			const filters = {};
-			if (jobTitle) filters.jobTitle = new RegExp(jobTitle, "i");
-			if (location) filters.employerLocation = new RegExp(location, "i");
-			if (industry) filters.industry = industry;
-			if (jobType) filters.jobType = jobType;
-			if (jobLevel) filters.jobLevel = jobLevel;
-
-			// Fetch and filter job listings from the database
-			const filteredJobs = await jobPostingsCollection.find(filters).toArray();
-
-			res.render("./students/student-dashboard", {
-				student: user,
-				jobListings: filteredJobs,
-				query: { jobTitle, location },
+			const student = await studentsCollection.findOne({
+				_id: new ObjectId(user._id),
 			});
+
+			if (student) {
+				const { jobTitle, location, industry, jobType, jobLevel } = req.body;
+
+				// Prepare filter options
+				const filters = {};
+				if (jobTitle) filters.jobTitle = new RegExp(jobTitle, "i");
+				if (location) filters.employerLocation = new RegExp(location, "i");
+				if (industry) filters.industry = industry;
+				if (jobType) filters.jobType = jobType;
+				if (jobLevel) filters.jobLevel = jobLevel;
+
+				// Fetch and filter job listings from the database
+				const filteredJobs = await jobPostingsCollection
+					.find(filters)
+					.toArray();
+
+				const jobListingsWithSavedFlag = filteredJobs.map((job) => {
+					return {
+						_id: job._id,
+						jobTitle: job.jobTitle,
+						company: job.company,
+						employerLocation: job.employerLocation,
+						jobType: job.jobType,
+						isSaved: student.savedPosts.includes(job._id.toString()),
+					};
+				});
+
+				const jobListings = {
+					studentIndustryJobs: jobListingsWithSavedFlag,
+				};
+
+				console.log("Filtered Job Listings", jobListings);
+				res.render("./students/student-dashboard", {
+					jobListings,
+					query: { jobTitle, location, industry, jobType, jobLevel },
+				});
+			} else {
+				console.log("Student not found");
+				res.redirect("/login");
+			}
 		} else {
 			console.log("Invalid user or user type");
 			res.redirect("/login");
@@ -281,6 +329,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
 		res.redirect("/login");
 	}
 });
+
 
 router.get("/job-post", async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;
@@ -340,7 +389,6 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 			res.render("./students/student-applied-jobs", {
 				allAppliedJobs: allAppliedJobsWithStatus,
 			});
-
 		} else {
 			res.render("./students/student-applied-jobs", { allAppliedJobs: [] });
 		}
@@ -350,29 +398,20 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 	}
 });
 
-
-
-
 router.post("/apply-job", isAuthenticated, async (req, res) => {
-	const jobPostingsCollection = req.app.locals.jobPostings;
 	const studentsCollection = req.app.locals.students;
 	const user = req.user;
-	const jobId = req.body.jobId; // Assuming the jobId is sent in the request body
+	const jobId = req.body.jobId; 
 
 	try {
-		// Check if the student is logged in and is of the type "student"
+		
 		if (user && user.userType === "student") {
-			// Retrieve the student ID
+			
 			const studentId = user._id;
 
-			// Add the student ID to the job post's applicants array
-			await jobPostingsCollection.updateOne(
-				{ _id: new ObjectId(jobId) },
-				{ $addToSet: { applicants: studentId } }
-			);
+
+			const status = "Pending";
 			
-			const status = "Pending"
-			// Add the job ID to the student's appliedJobs array
 			await studentsCollection.updateOne(
 				{ _id: new ObjectId(studentId) },
 				{ $push: { appliedJobs: { jobId: jobId, status: status } } }
@@ -382,7 +421,7 @@ router.post("/apply-job", isAuthenticated, async (req, res) => {
 			res.sendStatus(204);
 		} else {
 			console.log("Invalid user or user type");
-			res.sendStatus(401); // Unauthorized status code
+			res.sendStatus(401); 
 		}
 	} catch (error) {
 		console.error("Error submitting job application:", error);
@@ -431,22 +470,38 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 			return res.sendStatus(400);
 		}
 
-		const result = await studentsCollection.updateOne(
-			{ _id: new ObjectId(studentId) },
-			{ $addToSet: { savedPosts: postId } }
-		);
+		const student = await studentsCollection.findOne({
+			_id: new ObjectId(studentId),
+		});
 
-		if (result.modifiedCount === 1) {
-			console.log("Post saved successfully");
+		if (!student) {
+			return res.sendStatus(404);
+		}
+
+		const savedPosts = student.savedPosts;
+
+		if (savedPosts.includes(postId)) {
+			// Remove the postId from savedPosts
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId) },
+				{ $pull: { savedPosts: postId } }
+			);
+			console.log("Post removed from saved posts");
 			res.sendStatus(204);
 		} else {
-			console.log("Post already saved");
+			// Add the postId to savedPosts
+			await studentsCollection.updateOne(
+				{ _id: new ObjectId(studentId) },
+				{ $addToSet: { savedPosts: postId } }
+			);
+			console.log("Post saved successfully");
 			res.sendStatus(204);
 		}
 	} catch (error) {
-		console.error("Error saving post:", error);
+		console.error("Error saving/removing post:", error);
 		res.sendStatus(500);
 	}
 });
+
 
 module.exports = router;
