@@ -139,6 +139,8 @@ router.post("/login", (req, res, next) => {
 				return res.redirect("/student/dashboard");
 			if (user.accountType == "employer")
 				return res.redirect("/employer/dashboard");
+			if(user.accountType == "admin")
+				return res.redirect("/admin/dashboard")
 		});
 	})(req, res, next);
 });

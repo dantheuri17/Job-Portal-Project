@@ -5,14 +5,15 @@ const { MongoClient } = require("mongodb");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
-const hbs = require('hbs')
-const authRouter = require('./routes/authRoutes');
-const authUtils = require('./utils/authUtils');
-const indexRouter = require('./routes/index');
-const studentRoutes = require('./routes/studentRoutes')
-const employerRoutes = require('./routes/employerRoutes')
-const flash = require('express-flash')
-const methodOverride = require('method-override')
+const hbs = require("hbs");
+const authRouter = require("./routes/authRoutes");
+const authUtils = require("./utils/authUtils");
+const indexRouter = require("./routes/index");
+const studentRoutes = require("./routes/studentRoutes");
+const employerRoutes = require("./routes/employerRoutes");
+const adminRoutes = require('./routes/adminRoutes')
+const flash = require("express-flash");
+const methodOverride = require("method-override");
 
 const app = express();
 const port = 3000;
@@ -30,7 +31,7 @@ hbs.registerHelper("eq", function (a, b) {
 app.set("view engine", "hbs");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json())
+app.use(express.json());
 app.use(methodOverride("_method"));
 
 app.use(
@@ -44,18 +45,18 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(flash())
+app.use(flash());
 
-app.get('/', (req, res) => {
-	res.render('home')
-})
+app.get("/", (req, res) => {
+	res.render("home");
+});
 
 const uri = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(uri);
 let studentsCollection;
 let employersCollection;
-let jobPostingsCollection; 
-
+let jobPostingsCollection;
+let adminsCollection;
 
 client
 	.connect()
@@ -64,46 +65,60 @@ client
 		studentsCollection = loginDb.collection("students");
 		employersCollection = loginDb.collection("employers");
 		jobPostingsCollection = loginDb.collection("jobPostings");
-		
+		adminsCollection = loginDb.collection("admins"); // Initialize adminsCollection here
+
 		console.log("Connected to MongoDB");
 		app.locals.students = studentsCollection;
 		app.locals.employers = employersCollection;
 		app.locals.jobPostings = jobPostingsCollection;
+		app.locals.admins = adminsCollection; // Add this line
 	})
 	.catch((error) => {
 		console.error("Error connecting to MongoDB: ", error);
 	});
 
+// Inside the database connection setup
+const adminUser = {
+	username: "admin",
+	password: authUtils.hashPassword("admin"), // Hash the password
+};
+
 passport.use(
 	new LocalStrategy(async (username, password, done) => {
 		try {
-			username = username.trim(); 
+			username = username.trim();
+
+			// Check if the user is an admin
+			const admin = await adminsCollection.findOne({ username });
+			if (admin && admin.password === password) {
+				console.log("Admin authenticated");
+				return done(null, admin);
+			}
+
+			// Check if the user is a student
 			let user = await studentsCollection.findOne({ username });
-			let userType = "student"; 
-
-			if (!user) {
-				user = await employersCollection.findOne({ username });
-				userType = "employer"; 
+			if (user) {
+				const hashedPassword = authUtils.hashPassword(password);
+				if (hashedPassword === user.password) {
+					user.userType = "student";
+					console.log("Student authenticated");
+					return done(null, user);
+				}
 			}
 
-			if (!user) {
-				console.log("Incorrect username");
-				return done(null, false, { message: "Incorrect username" });
+			// Check if the user is an employer
+			user = await employersCollection.findOne({ username });
+			if (user) {
+				const hashedPassword = authUtils.hashPassword(password);
+				if (hashedPassword === user.password) {
+					user.userType = "employer";
+					console.log("Employer authenticated");
+					return done(null, user);
+				}
 			}
 
-			const hashedPassword = authUtils.hashPassword(password);
-
-			console.log("Expected hashed password:", user.password);
-			console.log("Actual hashed password:", hashedPassword);
-
-			if (hashedPassword !== user.password) {
-				console.log("Incorrect password");
-				return done(null, false, { message: "Incorrect password" });
-			}
-
-			user.userType = userType; 
-			console.log("User authenticated");
-			return done(null, user);
+			console.log("Incorrect credentials");
+			return done(null, false, { message: "Incorrect credentials" });
 		} catch (error) {
 			return done(error);
 		}
@@ -111,19 +126,21 @@ passport.use(
 );
 
 
+
 passport.serializeUser((user, done) => {
 	done(null, user);
 });
+
 
 passport.deserializeUser((user, done) => {
 	done(null, user);
 });
 
-app.use('/', authRouter);
-app.use('/', indexRouter);
-app.use('/student', studentRoutes)
-app.use('/employer', employerRoutes)
-
+app.use("/", authRouter);
+app.use("/", indexRouter);
+app.use('/admin', adminRoutes)
+app.use("/student", studentRoutes);
+app.use("/employer", employerRoutes);
 
 app.listen(port, () => {
 	console.log(`Server started on port ${port}`);
