@@ -59,7 +59,6 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 					studentIndustryJobs: jobListingsWithSavedFlag
 				}
 
-				console.log('Job Listings', jobListings)
 				res.render("./students/student-dashboard", { jobListings });
 			} else {
 				console.log("Student not found");
@@ -401,27 +400,52 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 router.post("/apply-job", isAuthenticated, async (req, res) => {
 	const studentsCollection = req.app.locals.students;
 	const user = req.user;
-	const jobId = req.body.jobId; 
+	const jobId = req.body.jobId;
 
 	try {
-		
 		if (user && user.userType === "student") {
-			
 			const studentId = user._id;
 
+			const student = await studentsCollection.findOne({
+				_id: new ObjectId(studentId),
+			});
 
+			if (!student) {
+				return res.sendStatus(401); // Unauthorized
+			}
+
+			// Check if the required fields are filled
+			if (
+				!student.username ||
+				!student.password ||
+				!student.accountType ||
+				!student.email ||
+				!student.firstName ||
+				!student.lastName ||
+				!student.location ||
+				!student.major ||
+				!student.profilePicture ||
+				!student.resume ||
+				!student.industry
+			) {
+				req.flash("error", "Please fill out all the required details.");
+				return res.redirect("/student/dashboard"); // Redirect back to the application page
+			}
+
+			// If all required fields are filled, proceed with the application
 			const status = "Pending";
-			
+
 			await studentsCollection.updateOne(
 				{ _id: new ObjectId(studentId) },
 				{ $push: { appliedJobs: { jobId: jobId, status: status } } }
 			);
 
 			console.log("Job application submitted successfully");
-			res.sendStatus(204);
+			req.flash("success", "Job application submitted successfully.");
+			res.redirect("/student/dashboard"); // Redirect with success flash message
 		} else {
 			console.log("Invalid user or user type");
-			res.sendStatus(401); 
+			res.sendStatus(401);
 		}
 	} catch (error) {
 		console.error("Error submitting job application:", error);
@@ -429,15 +453,16 @@ router.post("/apply-job", isAuthenticated, async (req, res) => {
 	}
 });
 
+
 router.get("/saved-posts", isAuthenticated, async (req, res) => {
 	const user = req.user;
 	const studentsCollection = req.app.locals.students;
 	const jobsCollection = req.app.locals.jobPostings;
-	let allSavedPosts = []; // Change from const to let
+	let allSavedPosts = [];
 
 	try {
 		const student = await studentsCollection.findOne({
-			_id: new ObjectId(user._id), // Use ObjectId to convert the user ID to ObjectId
+			_id: new ObjectId(user._id),
 		});
 
 		if (student) {
@@ -445,11 +470,22 @@ router.get("/saved-posts", isAuthenticated, async (req, res) => {
 
 			allSavedPosts = await jobsCollection
 				.find({
-					_id: { $in: savedPostsId.map((id) => new ObjectId(id)) }, // Convert the saved post IDs to ObjectId
+					_id: { $in: savedPostsId.map((id) => new ObjectId(id)) },
 				})
 				.toArray();
+
+			// Check and mark saved status for each job
+			const jobListingsWithSavedFlag = allSavedPosts.map((job) => {
+				return {
+					...job,
+					isSaved: true,
+				};
+			});
+
+			res.render("./students/saved-posts", {
+				allSavedPosts: jobListingsWithSavedFlag,
+			});
 		}
-		res.render("./students/saved-posts", { allSavedPosts });
 	} catch (error) {
 		console.log("error retrieving saved post:", error);
 		res
@@ -457,6 +493,7 @@ router.get("/saved-posts", isAuthenticated, async (req, res) => {
 			.json({ error: "An error occurred while retrieving saved Job Posts" });
 	}
 });
+
 
 router.post("/save-post", isAuthenticated, async (req, res) => {
 	const studentsCollection = req.app.locals.students;

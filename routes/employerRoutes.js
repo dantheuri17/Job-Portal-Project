@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
 const { isAuthenticated } = require("../utils/authUtils");
+const jobRoutes = require('./employerJobRoutes');
 const hbs = require("hbs");
 const stripHtmlTagsHelper = require("../helpers/scriptHtmlTags");
 
 hbs.registerHelper("stripHtmlTags", stripHtmlTagsHelper.stripHtmlTags);
+
+router.use('/', jobRoutes); 
 
 router.get("/profile", isAuthenticated, async (req, res) => {
 	const employers = req.app.locals.employers;
@@ -106,38 +109,6 @@ router.post("/settings", isAuthenticated, async (req, res) => {
 	}
 });
 
-router.post("/postJob", isAuthenticated, async (req, res) => {
-	const jobPostingsCollection = req.app.locals.jobPostings;
-	const { jobTitle, jobType, jobDescription, jobLevel, closingDate } = req.body;
-	const employerId = req.user._id;
-	const employerIndustry = req.user.industry;
-	const employerLocation = req.user.employerLocation;
-	const employerCompanyName = req.user.companyName;
-
-	try {
-		const newJob = {
-			company: employerCompanyName,
-			jobTitle: jobTitle,
-			jobType: jobType,
-			jobDescription: jobDescription,
-			jobLevel: jobLevel,
-			industry: employerIndustry,
-			closingDate: closingDate,
-			employerId: employerId,
-			employerLocation: employerLocation,
-		};
-
-		const result = await jobPostingsCollection.insertOne(newJob);
-
-		console.log("Job posted successfully");
-		console.log(req.user.employerLocation);
-		console.log(newJob);
-		res.redirect("/employer/dashboard");
-	} catch (error) {
-		console.error("Error posting job:", error);
-		res.redirect("/employer/postJob");
-	}
-});
 
 router.get("/dashboard", isAuthenticated, async (req, res) => {
 	const employersCollection = req.app.locals.employers;
@@ -179,24 +150,7 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 	}
 });
 
-router.get("/job-post", async (req, res) => {
-	const jobPostingsCollection = req.app.locals.jobPostings;
-	const jobId = req.query.id;
-	try {
-		const jobPost = await jobPostingsCollection.findOne({
-			_id: new ObjectId(jobId),
-		});
 
-		if (jobPost) {
-			res.render("./jobs/employer-job-post", { jobPost });
-		} else {
-			res.status(404).send("Job not found");
-		}
-	} catch (error) {
-		console.error("Error retrieving job details:", error);
-		res.status(500).send("An error occurred while fetching job details");
-	}
-});
 
 router.get("/job-applications", isAuthenticated, async (req, res) => {
 	const employersCollection = req.app.locals.employers;
@@ -240,9 +194,9 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 				});
 			});
 
-			// Create an object to store job postings and their applicants
+			
 			const jobApplications = jobPostings.map((job) => {
-				// Filter students who applied for this job
+				
 				const applicants = students.filter((student) =>
 					student.appliedJobs.some(
 						(appliedJob) => appliedJob.jobId === job._id.toString()
@@ -345,6 +299,7 @@ router.post(
 		}
 	}
 );
+
 
 module.exports = router;
 

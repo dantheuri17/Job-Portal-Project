@@ -12,7 +12,7 @@ router.get("/register", (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-	const { username, password, type } = req.body;
+	let { username, password, type } = req.body;
 	username = username.trim();
 	password = password.trim(); 
 

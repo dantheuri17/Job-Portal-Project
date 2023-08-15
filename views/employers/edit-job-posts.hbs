@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Include Quill.js CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <title>Edit Job Post</title>
+</head>
+
+<body>
+    
+    <div class="container my-5">
+        <h1 class="mb-4">Edit Job Post</h1>
+        <form action="/employer/edit-post/{{jobPost._id}}" method="post">
+            <!-- Add the hidden input fields for job description -->
+            <input type="hidden" id="formattedJobDescription" value="{{jobPost.jobDescription}}">
+            <input type="hidden" id="jobDescriptionInput" name="jobDescription" value="{{jobPost.jobDescription}}">
+
+            <div class="mb-3">
+                <label for="jobTitle" class="form-label">Job Title</label>
+                <input type="text" class="form-control" id="jobTitle" name="jobTitle" value="{{jobPost.jobTitle}}">
+            </div>
+            <div class="mb-3">
+                <label for="jobType" class="form-label">Job Type</label>
+                <select class="form-select" id="jobType" name="jobType">
+                    <option value="" disabled selected>{{jobPost.jobType}}</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Full Time">Full Time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Part Time">Part Time</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="jobDescription" class="form-label">Job Description</label>
+                <div id="jobDescription">
+
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="jobLevel" class="form-label">Job Level</label>
+                <select class="form-select" id="jobLevel" name="jobLevel" value="{{jobPost.jobLevel}}">
+                    <option value="" disabled selected>{{jobPost.jobLevel}}</option>
+                    <option value="Entry Level">Entry Level</option>
+                    <option value="Mid Level">Mid Level</option>
+                    <option value="Senior Level">Senior Level</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="industry" class="form-label">Industry</label>
+                <input type="text" class="form-control" id="industry" name="industry" value="{{jobPost.industry}}">
+            </div>
+            <div class="mb-3">
+                <label for="closingDate" class="form-label">Closing Date</label>
+                <input type="date" class="form-control" id="closingDate" name="closingDate"
+                    value="{{jobPost.closingDate}}">
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+
+    <!-- Include Quill.js script -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        // Initialize Quill.js editor
+        var quill = new Quill('#jobDescription', {
+            theme: 'snow',
+        });
+
+        // Get the formatted job description from a hidden input field
+        var formattedJobDescription = document.getElementById('formattedJobDescription').value;
+
+        // Set the formatted job description in the Quill editor
+        quill.root.innerHTML = formattedJobDescription;
+
+        // Get and set the job description value to the hidden input
+        var jobDescriptionInput = document.getElementById('jobDescriptionInput');
+        quill.on('text-change', function () {
+            jobDescriptionInput.value = quill.root.innerHTML;
+        });
+    </script>
+</body>
+
+</html>
