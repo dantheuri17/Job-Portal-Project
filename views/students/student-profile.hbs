@@ -7,71 +7,6 @@
     <title>Student Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <style>
-        .profile-picture {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        .student-info {
-            margin-bottom: 30px;
-        }
-
-        .student-info h3 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .student-info p {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .welcome-heading {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 40px;
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .sidebar {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-        }
-
-        .sidebar h4 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .sidebar ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar a {
-            color: #000;
-            text-decoration: none;
-        }
-
-        .sidebar a:hover {
-            color: #000;
-            text-decoration: underline;
-        }
-
-        .resume-link {
-            display: block;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 
 <body>
@@ -79,23 +14,20 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="sidebar">
-                    <h4>Menu</h4>
-                    <ul>
-                        <li><a href="#">Profile</a></li>
-                        <li><a href="/student/settings">Settings</a></li>
-                        <li><a href="/logout">Logout</a></li>
-                    </ul>
+                    <a href="/student/profile" class="d-block">Student Profile</a>
+                    <a href="/student/settings" class="d-block">Settings</a>
+                    <a href="/student/saved-posts" class="d-block">Saved Posts</a>
+                    <a href="/student/applied-jobs" class="d-block">Applied Jobs</a>
+                    <a href="/logout" class="d-block">Logout</a>
                 </div>
             </div>
             <div class="col-md-9">
-                <h2 class="welcome-heading">Welcome to your profile</h2>
-
+                <h2 class="text-center mt-4 mb-4">Welcome to your profile</h2>
                 <div class="row">
                     <div class="col-md-6">
                         <img src="{{ student.profilePicture }}" alt="Profile Picture"
                             class="img-thumbnail profile-picture">
                     </div>
-
                     <div class="col-md-6">
                         <div class="student-info">
                             <h3>{{student.firstName}} {{student.lastName}}</h3>
@@ -103,10 +35,8 @@
                             <p><strong>Email:</strong> {{ student.email }}</p>
                             <p><strong>Industry:</strong> {{ student.industry }}</p>
                             <p><strong>Location:</strong> {{ student.location }}</p>
-
-
                             {{#if student.resume}}
-                            <a href="/student/resume" class="resume-link">View Resume</a>
+                            <a href="/student/resume" class="btn btn-primary mt-3">View Resume</a>
                             {{/if}}
                         </div>
                     </div>

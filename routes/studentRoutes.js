@@ -42,22 +42,26 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 			});
 
 			if (student) {
-				// Fetch job listings based on the student's industry preference (6 jobs in this example)
 				const studentIndustryJobs = await getJobsFromStudentIndustry(
 					jobPostingsCollection,
 					student.industry
 				);
 
-				const jobListingsWithSavedFlag = studentIndustryJobs.map(job => {
+				const jobListingsWithSavedFlag = studentIndustryJobs.map((job) => {
+					let isSaved = false;
+					if (student.savedPosts && Array.isArray(student.savedPosts)) {
+						isSaved = student.savedPosts.includes(job._id.toString());
+					}
+
 					return {
 						...job,
-						isSaved: student.savedPosts.includes(job._id.toString())
-					}
-				})
+						isSaved: isSaved,
+					};
+				});
 
 				const jobListings = {
-					studentIndustryJobs: jobListingsWithSavedFlag
-				}
+					studentIndustryJobs: jobListingsWithSavedFlag,
+				};
 
 				res.render("./students/student-dashboard", { jobListings });
 			} else {
@@ -84,14 +88,19 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 			const student = await students.findOne({ _id: new ObjectId(user._id) });
 
 			if (student) {
-				// Decode the profile picture data from base64 to binary
+				// Check if profile picture data exists before accessing it
 				const profilePictureData =
-					student.profilePicture.binaryProfilePictureData;
+					student.profilePicture &&
+					student.profilePicture.binaryProfilePictureData
+						? student.profilePicture.binaryProfilePictureData
+						: null;
 
-				// Set the profile picture as a data URL
-				student.profilePicture = `data:image/jpeg;base64,${profilePictureData.toString(
-					"base64"
-				)}`;
+				// Set the profile picture as a data URL if data is available
+				if (profilePictureData) {
+					student.profilePicture = `data:image/jpeg;base64,${profilePictureData.toString(
+						"base64"
+					)}`;
+				}
 
 				res.render("./students/student-profile", { student });
 			} else {
@@ -107,6 +116,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 		res.redirect("/login");
 	}
 });
+
 
 router.get("/resume", async (req, res) => {
 	const students = req.app.locals.students;
@@ -282,6 +292,11 @@ router.post("/search", isAuthenticated, async (req, res) => {
 			if (student) {
 				const { jobTitle, location, industry, jobType, jobLevel } = req.body;
 
+				// Initialize student.savedPosts if it's not defined
+				if (!student.savedPosts) {
+					student.savedPosts = [];
+				}
+
 				// Prepare filter options
 				const filters = {};
 				if (jobTitle) filters.jobTitle = new RegExp(jobTitle, "i");
@@ -330,6 +345,8 @@ router.post("/search", isAuthenticated, async (req, res) => {
 });
 
 
+
+
 router.get("/job-post", async (req, res) => {
 	const jobPostingsCollection = req.app.locals.jobPostings;
 	const jobId = req.query.id;
@@ -360,7 +377,7 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 		});
 
 		if (student) {
-			const appliedJobs = student.appliedJobs; // Array of applied jobs
+			const appliedJobs = student.appliedJobs || []; // Initialize as empty array if undefined
 
 			const appliedJobIds = appliedJobs.map((job) => job.jobId); // Extract job IDs from objects
 
@@ -396,6 +413,7 @@ router.get("/applied-jobs", isAuthenticated, async (req, res) => {
 		res.status(500).send("Error occurred while fetching applied job details");
 	}
 });
+
 
 router.post("/apply-job", isAuthenticated, async (req, res) => {
 	const studentsCollection = req.app.locals.students;
@@ -515,7 +533,7 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 			return res.sendStatus(404);
 		}
 
-		const savedPosts = student.savedPosts;
+		const savedPosts = student.savedPosts || []; // Initialize if undefined
 
 		if (savedPosts.includes(postId)) {
 			// Remove the postId from savedPosts
@@ -539,6 +557,7 @@ router.post("/save-post", isAuthenticated, async (req, res) => {
 		res.sendStatus(500);
 	}
 });
+
 
 
 module.exports = router;

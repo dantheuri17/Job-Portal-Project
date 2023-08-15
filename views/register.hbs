@@ -33,14 +33,21 @@
         </div>
         {{/if}}
 
-        <form action="/register" method="POST">
+        <form action="/register" method="POST" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" class="form-control" required>
+                <input type="password" id="password" name="password" class="form-control" required minlength="8">
+                <small class="form-text text-muted">Password must be at least 8 characters long and contain a
+                    number.</small>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                <small id="passwordMismatch" class="text-danger d-none">Passwords do not match.</small>
             </div>
             <div class="form-group">
                 <label for="type">Account Type:</label>
@@ -53,6 +60,33 @@
         </form>
         <p class="register-link">If you already have an account <a href="/login">Login</a></p>
     </div>
+
+<script>
+    function validateForm() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmPassword").value;
+        var passwordMismatch = document.getElementById("passwordMismatch");
+
+        if (password !== confirmPassword) {
+            passwordMismatch.classList.remove("d-none");
+            return false; // Prevent form submission
+        } else {
+            passwordMismatch.classList.add("d-none");
+        }
+
+        if (!/\d/.test(password)) {
+            // Check for at least one number in the password
+            passwordMismatch.textContent = "Password must contain at least one number.";
+            passwordMismatch.classList.remove("d-none");
+            return false; // Prevent form submission
+        } else {
+            passwordMismatch.classList.add("d-none");
+            return true; // Allow form submission
+        }
+    }
+</script>
+
+
 </body>
 
 </html>

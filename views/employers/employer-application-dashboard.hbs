@@ -26,7 +26,10 @@
                     <li class="list-group-item">
                         <b>Name:</b> {{this.firstName}} {{this.lastName}}<br>
                         <b>Email:</b> {{this.email}}<br>
-                        <b>Resume:</b> <a href="/student/resume">View Resume</a><br>
+                        <b>Resume:</b> <a href="/employer/student-resume/{{this._id}}" target="_blank">View
+                            Resume</a><br>
+
+
 
                         <!-- Add forms for accept/reject buttons -->
                         <form class="d-inline" method="POST"
@@ -38,13 +41,14 @@
                             action="/employer/reject-student/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-danger" type="submit">Reject</button>
                         </form>
-                        
-                        <form class="d-inline" method="POST" action="/employer/delete-application/{{this._id}}/{{../this.jobPost.jobId}}">
+
+                        <form class="d-inline" method="POST"
+                            action="/employer/delete-application/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-secondary" type="submit">Delete</button>
                         </form>
 
 
-                        
+
                     </li>
                     {{/each}}
                 </ul>

@@ -225,6 +225,29 @@ router.get("/job-applications", isAuthenticated, async (req, res) => {
 	}
 });
 
+// Create a route to serve student resumes as PDF
+router.get("/student-resume/:studentId", async (req, res) => {
+  try {
+    const studentsCollection = req.app.locals.students;
+    const studentId = req.params.studentId;
+
+    const student = await studentsCollection.findOne({ _id: new ObjectId(studentId) });
+
+    if (student && student.resume && student.resume.binaryResumeData) {
+      const resumeData = student.resume.binaryResumeData.buffer;
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline; filename=resume.pdf");
+      res.send(resumeData);
+    } else {
+      console.log("Student resume not found");
+      res.status(404).send("Student resume not found");
+    }
+  } catch (error) {
+    console.error("Error retrieving student resume:", error);
+    res.status(500).send("An error occurred while fetching student resume");
+  }
+});
+
 // Add a POST route to accept a student application
 router.post(
 	"/accept-student/:studentId/:jobId",
