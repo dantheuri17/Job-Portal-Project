@@ -66,6 +66,14 @@
             color: #000;
             text-decoration: underline;
         }
+
+        .profile-logo {
+            max-width: 100%;
+            /* Adjust this value to control the maximum width */
+            height: auto;
+            /* Automatically adjusts the height while maintaining aspect ratio */
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -86,7 +94,8 @@
                 <h2 class="welcome-heading">Welcome to your profile</h2>
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="{{ employer.logo }}" alt="Logo" class="img-thumbnail profile-logo">
+                        <img class="profile-logo" src="data:image/png;base64,{{employer.logo.logoImageBinary.base64}}"
+                            alt="Employer Logo">
                     </div>
                     <div class="col-md-6">
                         <div class="employer-info">

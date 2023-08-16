@@ -5,15 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom styles */
         body {
-            display: flex;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
         }
 
         .sidebar {
-            width: 200px;
+            width: 250px;
             background-color: #f8f9fa;
             padding: 20px;
         }
@@ -35,24 +38,30 @@
             text-decoration: none;
             color: #007bff;
             display: block;
+            transition: color 0.2s;
         }
 
         .sidebar a:hover {
-            font-weight: bold;
             color: #0056b3;
         }
 
         .content {
             flex: 1;
             padding: 20px;
+            background-color: #f8f9fa;
         }
 
         .job-card {
-            background-color: #f8f9fa;
+            background-color: #fff;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+
+        .job-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .job-card h3 {
@@ -60,11 +69,51 @@
             font-size: 20px;
             color: #007bff;
         }
+
+        .job-card p.description {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .job-card p.closing-date {
+            margin: 10px 0;
+            font-size: 14px;
+            color: black; 
+        }
+
+        a {
+            text-decoration: none;
+        }
     </style>
+
+    <script>
+        // Function to check if a date has already passed
+        function isDatePassed(dateString) {
+            const currentDate = new Date();
+            const closingDate = new Date(dateString);
+            return currentDate > closingDate;
+        }
+
+        // Function to apply red color to passed dates
+        function updateClosingDateColor() {
+            const closingDateElements = document.querySelectorAll('.closing-date');
+
+            closingDateElements.forEach((element) => {
+                const dateString = element.textContent.replace('Closing Date: ', '');
+                if (isDatePassed(dateString)) {
+                    element.style.color = '#dc3545'; // Red color
+                }
+            });
+        }
+
+        // Run the updateClosingDateColor function when the page loads
+        window.onload = updateClosingDateColor;
+    </script>
 </head>
 
 <body>
-    
+
     <div class="sidebar">
         <h3>Employer Dashboard</h3>
         <ul>
@@ -77,23 +126,24 @@
     </div>
 
     <div class="content">
-        <!-- Inside dashboard.hbs -->
         <h1>Welcome, {{employer.firstName}}!</h1>
         <h2>Job Listings:</h2>
-        {{#if jobListings.length}}
-        <div id="job-cards">
+        <div class="job-cards">
             {{#each jobListings}}
             <a href="/employer/job-post?id={{this._id}}" class="job-card-link">
                 <div class="job-card">
                     <h3>{{jobTitle}}</h3>
                     <p class="description">{{jobType}}</p>
+                    {{#if closingDate}}
+                    <p class="closing-date">Closing Date: {{closingDate}}</p>
+                    {{/if}}
                 </div>
             </a>
             {{/each}}
         </div>
-        {{else}}
+        {{#unless jobListings.length}}
         <p>No job postings found.</p>
-        {{/if}}
+        {{/unless}}
     </div>
 
 </body>

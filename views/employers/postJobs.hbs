@@ -171,6 +171,21 @@
             });
         });
     </script>
+    <script>
+        function validateForm() {
+            const closingDateInput = document.getElementById("closingDate");
+            const currentDate = new Date();
+            const selectedDate = new Date(closingDateInput.value);
+
+            // Compare selected date with current date
+            if (selectedDate < currentDate) {
+                alert("Closing date cannot be before the current date.");
+                return false; // Prevent form submission
+            }
+
+            return true; // Allow form submission
+        }
+    </script>
 </body>
 
 </html>

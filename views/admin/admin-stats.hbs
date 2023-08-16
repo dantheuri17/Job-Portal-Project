@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Statistics</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-3">Admin Statistics</h2>
+
+        <div class="mt-4">
+            <h3>Statistics:</h3>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    Number of Students: {{studentsCount}}
+                </li>
+                <li class="list-group-item">
+                    Number of Employers: {{employersCount}}
+                </li>
+                <li class="list-group-item">
+                    Total Job Postings: {{totalJobPostings}}
+                </li>
+            </ul>
+        </div>
+
+        <div class="mt-4">
+            <h3>Job Postings by Industry:</h3>
+            <ul class="list-group">
+                {{#each jobCountsByIndustry}}
+                <li class="list-group-item">
+                    {{_id}}: {{count}} jobs
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <div class="mt-4">
+            <h3>Job Postings by Location:</h3>
+            <ul class="list-group">
+                {{#each jobCountsByLocation}}
+                <li class="list-group-item">
+                    {{_id}}: {{count}} jobs
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <div class="mt-4">
+            <form action="/admin/stats-pdf" method="GET">
+                <button type="submit" class="btn btn-primary">Export to PDF</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS scripts here -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

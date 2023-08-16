@@ -61,7 +61,7 @@ router.post(
 
 
 		function trimFields(fields) {
-			const trimFields = {}; 
+			const trimmedFields = {}; 
 			for (const field in fields) {
 				trimmedFields[field] = fields[field].trim()
 			}

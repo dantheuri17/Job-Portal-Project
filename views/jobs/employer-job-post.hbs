@@ -19,10 +19,10 @@
         .card {
             margin-top: 20px;
         }
-        .sidebar > li {
+        .sidebar > ul > li {
             list-style: none;
         }
-       .sidebar > a {
+       .sidebar ul > li > a {
             text-decoration: none;
         }
     </style>
@@ -70,8 +70,11 @@
                             <p class="card-text"><strong>Company:</strong> {{jobPost.company}}</p>
                             <p class="card-text"><strong>Location:</strong> {{jobPost.employerLocation}}</p>
                             <p class="card-text"><strong>Job Type:</strong> {{jobPost.jobType}}</p>
+                            {{#if jobPost.closingDate}}
+                            <p class="card-text"><strong>Closing Date:</strong> {{jobPost.closingDate}}</p>
+                            {{/if}}
                             <p class="card-text"><strong>Job Description:</strong> {{{jobPost.jobDescription}}}</p>
-
+                    
                             <!-- Add "Edit" and "Delete" buttons with Bootstrap classes -->
                             <a href="/employer/edit-job/{{jobPost._id}}" class="btn btn-primary me-2">Edit Job</a>
                             <a href="/employer/delete-post/{{jobPost._id}}" class="btn btn-danger">Delete Job</a>
