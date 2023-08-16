@@ -7,39 +7,80 @@
     <title>Job Applications</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        /* Custom styles for the sidebar (navbar) */
-        .sidebar {
-            background-color: #343a40;
-            color: white;
-            padding: 20px;
-            width: 250px;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
 
-        .sidebar h3 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar a {
-            text-decoration: none;
-            color: white;
-        }
-    </style>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+        
+            .sidebar {
+                background-color: #333;
+                color: white;
+                padding: 20px;
+                width: 250px;
+                position: fixed;
+                height: 100%;
+            }
+        
+            .sidebar h3 {
+                margin-bottom: 20px;
+            }
+        
+            .sidebar ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+        
+            .sidebar ul li {
+                margin-bottom: 10px;
+            }
+        
+            .sidebar ul li a {
+                color: white;
+                text-decoration: none;
+            }
+        
+            .container {
+                margin-left: 280px;
+                margin-top: 20px;
+            }
+        
+            .card {
+                margin-top: 20px;
+            }
+        
+            .card-header {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+            }
+        
+            .card-body {
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 15px;
+            }
+        
+            .list-group-item {
+                border: none;
+            }
+        
+            .btn-success {
+                background-color: #28a745;
+                border-color: #28a745;
+            }
+        
+            .btn-danger {
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+        
+            .btn-secondary {
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+        </style>
 </head>
 
 <body>
@@ -50,7 +91,7 @@
             <li><a href="/employer/profile">Profile</a></li>
             <li><a href="/employer/postJob">Post Job</a></li>
             <li><a href="/employer/settings">Settings</a></li>
-            <li><a href="/employer/dashboard">Dashboard</a></li>
+            <li><a href="/employer/dashboard"> Dashboard</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </div>
@@ -73,7 +114,7 @@
                         <b>Email:</b> {{this.email}}<br>
                         <b>Resume:</b> <a href="/employer/student-resume/{{this._id}}" target="_blank">View
                             Resume</a><br>
-
+                            
                         <form class="d-inline" method="POST"
                             action="/employer/accept-student/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-success" type="submit">Accept</button>
@@ -88,6 +129,9 @@
                             action="/employer/delete-application/{{this._id}}/{{../this.jobPost.jobId}}">
                             <button class="btn btn-secondary" type="submit">Delete</button>
                         </form>
+
+
+
                     </li>
                     {{/each}}
                 </ul>
@@ -103,15 +147,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Attach a click event listener to the Delete buttons
             var deleteButtons = document.querySelectorAll(".delete-application");
+
             deleteButtons.forEach(function (button) {
                 button.addEventListener("click", function () {
-                    var applicationId = this.id.split("delete-")[1];
-                    var jobId = "{{this.jobPost.jobId}}";
+                    var applicationId = this.id.split("delete-")[1]; // Get the application ID
+                    var jobId = "{{this.jobPost.jobId}}"; // Get the job ID
+
+                    // Make an asynchronous DELETE request to delete the application
                     var xhr = new XMLHttpRequest();
                     xhr.open("DELETE", "/employer/delete-application/" + applicationId + "/" + jobId, true);
+
                     xhr.onload = function () {
                         if (xhr.status === 200) {
+                            // On success, remove the deleted application from the DOM
                             var listItem = button.closest('.list-group-item');
                             if (listItem) {
                                 listItem.parentNode.removeChild(listItem);
@@ -120,11 +170,13 @@
                             console.error("Error deleting application");
                         }
                     };
+
                     xhr.send();
                 });
             });
         });
     </script>
+
 </body>
 
 </html>

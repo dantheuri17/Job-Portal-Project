@@ -75,6 +75,7 @@ router.post(
 			industry,
 			noOfEmployees,
 			employerLocation,
+			employerPhoneNo,
 		} = trimFields(req.body);
 		
 		const registrationData = req.session.registrationData;
@@ -93,6 +94,7 @@ router.post(
 				industry: industry,
 				noOfEmployees: noOfEmployees,
 				employerLocation: employerLocation,
+				employerPhoneNo: employerPhoneNo,
 			};
 
 			if (req.file) {

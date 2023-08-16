@@ -167,6 +167,8 @@ router.post(
 			studentIndustry,
 			studentLocation,
 			studentAddress,
+			studentPhoneNo,
+			studentIDNumber
 		} = req.body;
 
 		const user = req.user;
@@ -202,6 +204,13 @@ router.post(
 				if (studentAddress) {
 					Object.assign(updateObject.$set, { studentAddress, studentAddress });
 				}
+				if (studentPhoneNo) {
+					Object.assign(updateObject.$set, { studentPhoneNo, studentPhoneNo });
+				}
+				if (studentIDNumber) {
+					Object.assign(updateObject.$set, { studentIDNumber, studentIDNumber });
+				}
+
 
 				// If a profile picture is uploaded, add it to the update object
 				if (req.files && req.files.profilePicture) {
