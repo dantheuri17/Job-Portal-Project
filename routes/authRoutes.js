@@ -92,7 +92,7 @@ router.post(
 				companyName: companyName,
 				industry: industry,
 				noOfEmployees: noOfEmployees,
-				location: employerLocation,
+				employerLocation: employerLocation,
 			};
 
 			if (req.file) {

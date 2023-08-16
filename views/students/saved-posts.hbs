@@ -4,18 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Add this line in the head section of your layout or template files -->
+    <!-- Add Bootstrap and Font Awesome links -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- Add Font Awesome CDN link -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
         }
 
-        .container {
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #333;
             padding-top: 20px;
+        }
+
+        .sidebar a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #444;
+        }
+
+        .container {
+            margin-left: 250px;
+            padding: 20px;
         }
 
         .job-card {
@@ -36,7 +58,8 @@
             margin: 0;
             color: #333;
         }
-         .save-button {
+
+        .save-button {
             padding: 8px 12px;
             background-color: #007bff;
             border: none;
@@ -67,9 +90,15 @@
 </head>
 
 <body>
+    <div class="sidebar">
+        <a href="/student/profile">Student Profile</a>
+        <a href="/student/settings">Settings</a>
+        <a href="/student/applied-jobs">Applied Jobs</a>
+        <a href="/student/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
     <div class="container">
         <h1>Saved Job Posts</h1>
-
         <div id="saved-job-cards">
             {{#each allSavedPosts}}
             <div class="job-card">

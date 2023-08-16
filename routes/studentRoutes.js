@@ -167,9 +167,6 @@ router.post(
 			studentIndustry,
 			studentLocation,
 			studentAddress,
-			oldPassword,
-			newPassword,
-			confirmPassword,
 		} = req.body;
 
 		const user = req.user;
@@ -412,7 +409,7 @@ router.post("/apply-job", isAuthenticated, async (req, res) => {
 				!student.resume ||
 				!student.industry
 			) {
-				req.flash("error", "Please fill out all the required details.");
+				req.flash("error", "Please fill out all the required details in Settings !!");
 				return res.redirect("/student/dashboard"); // Redirect back to the application page
 			}
 
