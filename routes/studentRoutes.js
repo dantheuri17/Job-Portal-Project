@@ -232,40 +232,6 @@ router.post(
 
 				await students.updateOne({ _id: new ObjectId(user._id) }, updateObject);
 
-				// Change password if old password, new password, and confirm password are provided
-				if (oldPassword && newPassword && confirmPassword) {
-					const student = await students.findOne({
-						_id: new ObjectId(user._id),
-					});
-
-					// Verify the old password
-					const isPasswordCorrect = comparePasswords(
-						oldPassword,
-						student.password
-					);
-					if (!isPasswordCorrect) {
-						console.log("Old password is incorrect");
-						// You can handle the error and show an appropriate message to the user
-						return res.redirect("/student/settings");
-					}
-
-					// Check if the new password and confirm password match
-					if (newPassword !== confirmPassword) {
-						console.log("New password and confirm password do not match");
-						// You can handle the error and show an appropriate message to the user
-						return res.redirect("/student/settings");
-					}
-
-					const hashedPassword = hashPassword(newPassword);
-
-					await students.updateOne(
-						{ _id: new ObjectId(user._id) },
-						{ $set: { password: hashedPassword } }
-					);
-
-					console.log("Password changed successfully");
-				}
-
 				console.log("Student information updated successfully");
 				res.redirect("/student/profile");
 			} catch (error) {

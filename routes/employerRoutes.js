@@ -5,6 +5,8 @@ const { isAuthenticated } = require("../utils/authUtils");
 const jobRoutes = require('./employerJobRoutes');
 const hbs = require("hbs");
 const stripHtmlTagsHelper = require("../helpers/scriptHtmlTags");
+const multer = require("multer"); // For handling file uploads
+const upload = multer();
 
 hbs.registerHelper("stripHtmlTags", stripHtmlTagsHelper.stripHtmlTags);
 
@@ -42,7 +44,7 @@ router.get("/settings", isAuthenticated, (req, res) => {
 	res.render("./employers/employer-settings");
 });
 
-router.post("/settings", isAuthenticated, async (req, res) => {
+router.post("/settings", isAuthenticated, upload.single("logo"), async (req, res) => {
 	const employers = req.app.locals.employers;
 	const user = req.user;
 	const {
@@ -95,6 +97,18 @@ router.post("/settings", isAuthenticated, async (req, res) => {
 					employerLocation: employerLocation,
 				});
 			}
+			console.log('req.file', req.file)
+			    if (req.file) {
+						const logoBuffer = req.file.buffer; 
+						const logo = {
+								base64: logoBuffer.toString("base64"),
+								subType: "00",
+						};
+						await employers.updateOne(
+							{ _id: new ObjectId(user._id) },
+							{ $set: { "logo.logoImageBinary": logo } }
+						);
+					}
 
 			await employers.updateOne({ _id: new ObjectId(user._id) }, updateObject);
 			console.log("employer information updated");
