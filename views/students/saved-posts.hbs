@@ -85,6 +85,10 @@
             background-color: #f0ad4e;
             color: #fff;
         }
+
+        #saved-job-cards > a {
+            text-decoration: none; 
+        }
     </style>
     <title>Saved Job Posts</title>
 </head>
@@ -101,18 +105,20 @@
         <h1>Saved Job Posts</h1>
         <div id="saved-job-cards">
             {{#each allSavedPosts}}
-            <div class="job-card">
-                <h3>{{this.jobTitle}}</h3>
-                <p><strong>Company:</strong> {{this.company}}</p>
-                <p><strong>Location:</strong> {{this.employerLocation}}</p>
-                <p><strong>Job Type:</strong> {{this.jobType}}</p>
-                <form class="saveForm" action="/student/save-post" method="post">
-                    <input type="hidden" name="postId" value="{{this._id}}">
-                    <button type="submit" class="save-button {{#if isSaved}}filled{{/if}}">
-                        <i class="far fa-star"></i> Save
-                    </button>
-                </form>
-            </div>
+            <a href="/student/job-post?id={{this._id}}" class="job-card-link">
+                <div class="job-card">
+                    <h3>{{this.jobTitle}}</h3>
+                    <p><strong>Company:</strong> {{this.company}}</p>
+                    <p><strong>Location:</strong> {{this.employerLocation}}</p>
+                    <p><strong>Job Type:</strong> {{this.jobType}}</p>
+                    <form class="saveForm" action="/student/save-post" method="post">
+                        <input type="hidden" name="postId" value="{{this._id}}">
+                        <button type="submit" class="save-button {{#if isSaved}}filled{{/if}}">
+                            <i class="far fa-star"></i> Save
+                        </button>
+                    </form>
+                </div>
+            </a>
             {{/each}}
         </div>
     </div>
